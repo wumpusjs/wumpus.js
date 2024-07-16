@@ -1,17 +1,17 @@
-import { Events } from "discord.js";
+import { ClientEvents, Events } from "discord.js";
 
-interface EventOptions {
+interface EventOptions<Event extends keyof ClientEvents> {
 	once?: boolean;
-	event: Events;
-	execute: (...args: any[]) => void;
+	event: Event;
+	execute: (...args: ClientEvents[Event]) => void;
 }
 
-export default class Event {
+export default class Event<Events extends keyof ClientEvents> {
 	once: boolean = false;
 	event: Events;
 	execute: (...args: any[]) => void;
 
-	constructor(options: EventOptions) {
+	constructor(options: EventOptions<Events>) {
 		this.once = Boolean(options.once ?? false);
 		this.event = options.event;
 		this.execute = options.execute;

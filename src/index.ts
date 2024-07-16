@@ -1,19 +1,20 @@
-import { Client, Events, GatewayIntentBits } from "discord.js";
+import { Client, GatewayIntentBits } from "discord.js";
 import dotenv from "dotenv";
-import { loadCommands } from "./utils/command";
+import { loadCommands, putCommands } from "./utils/command";
 import { loadEvents } from "./utils/event";
 
 dotenv.config();
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-client.once(Events.ClientReady, (readyClient) => {
-	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-});
+async function main() {
+	await loadCommands(client as Client & { command: any });
+	await loadEvents(client);
 
-loadCommands(client as Client & { command: any });
-loadEvents(client);
+	await putCommands((client as any).command.getCommandsJSON());
+		
+	client.login(process.env.TOKEN);
+	
+}
 
-console.log("Logging in...", process.env.TOKEN);
-
-client.login(process.env.TOKEN);
+main();

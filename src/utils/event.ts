@@ -16,7 +16,7 @@ export async function loadEvents(client: Client) {
 
 	events.files.forEach((event) => {
 		const { default: exportedContent } = require(path.join(process.cwd(), "src/events", event)) as {
-			default: Event;
+			default: Event<any>
 		};
 		if (!(exportedContent instanceof Event)) return error("Invalid event export:", event);
 
