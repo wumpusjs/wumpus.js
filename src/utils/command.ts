@@ -14,12 +14,12 @@ export async function loadCommands(client: Client & { command: CommandManager<Lo
 
 	if (!commands.files.length) return warn("No commands found");
 
-	if (!(client as any).command) client.command = new CommandManager(Locale.EnglishUS);
+	if (!client.command) client.command = new CommandManager(Locale.EnglishUS);
 
 	commands.files.forEach((command) => {
 		const { default: exportedContent } = require(path.join(process.cwd(), "src/commands", command));
-		(client as any).command.addCommand(exportedContent);
+		client.command.addCommand(exportedContent);
 	});
 
-	console.log("Commands loaded", (client as any).command);
+	console.log("Commands loaded", client.command);
 }
