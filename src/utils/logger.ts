@@ -10,3 +10,6 @@ export const warn = (...message: string[]) =>
 
 export const error = (...message: string[]) =>
 	console.log(header(chalk.red("ERROR")), chalk.red(message));
+
+export const success = (...message: string[]) =>
+	console.log(header(chalk.green("SUCCESS")), chalk.green(message));

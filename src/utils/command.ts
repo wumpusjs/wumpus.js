@@ -1,8 +1,16 @@
-import { Client, Locale, REST, RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from "discord.js";
+import {
+	Client,
+	Locale,
+	REST,
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	Routes,
+} from "discord.js";
 import { getFiles } from "./file";
-import { error, warn } from "./logger";
+import { error, info, success, warn } from "./logger";
 import CommandManager from "../classes/CommandManager";
 import path from "path";
+import { SHA256 } from "./crypto";
+import TempManager from "../classes/TempManager";
 
 export const getCommands = () =>
 	getFiles("./src/commands", ["ts", "js"], ["node_modules"]);
@@ -28,21 +36,34 @@ export async function loadCommands(
 	});
 }
 
-export async function putCommands(commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]) {
+export async function putCommands(
+	client: Client & { temp: TempManager },
+	commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]
+) {
+	info("Checking for changes in commands");
+	if (client.temp) {
+		let hash = SHA256(JSON.stringify(commands));
+		if (hash === client.temp.get("command-hash")) {
+			return info("No changes in commands, skipping reload");
+		} else {
+			client.temp.set("command-hash", hash, true);
+		}
+	}
+
 	const rest = new REST().setToken(process.env.TOKEN!);
 
 	try {
-		console.log(
+		info(
 			`Started refreshing ${commands.length} application (/) commands.`
 		);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
+		const data = (await rest.put(
 			Routes.applicationCommands(process.env.APPLICATION_ID!),
 			{ body: commands }
-		) as any;
+		)) as any;
 
-		console.log(
+		success(
 			`Successfully reloaded ${data?.length} application (/) commands.`
 		);
 	} catch (error) {
