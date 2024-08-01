@@ -12,7 +12,7 @@ export default new Command({
 	},
 	options: [
 		{
-			type: "STRING",
+			type: "USER",
 			description: {
 				"en-US": "The user to ping",
 				tr: "Ping atılacak kullanıcı",
@@ -25,7 +25,7 @@ export default new Command({
 		},
 	] as const,
 	execute: async (interaction, options) => {
-		await interaction.reply("Pong!" + options.user);
+		await interaction.reply("Pong! " + options.user.tag);
 	},
 	defaultLocale: Locale.EnglishUS,
 });
