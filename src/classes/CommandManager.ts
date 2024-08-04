@@ -53,7 +53,7 @@ export default class CommandManager<T extends Locale> {
 				});
 			}
 
-			this.timeouts.set(interaction.user.id, now);
+			this.timeouts.set(interaction.user.id, now + command.timeout);
 		}
 
 		const options: {
