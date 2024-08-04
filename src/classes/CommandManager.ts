@@ -2,10 +2,12 @@ import { ApplicationCommandOptionType, ChatInputCommandInteraction, Locale, REST
 import { error } from "../utils/logger";
 import Command from "./Command";
 import { OptionTypes } from "../interfaces/Command";
+import { HashMap } from "../utils/map";
 
 export default class CommandManager<T extends Locale> {
 	commands: Map<string, Command<any, T>> = new Map();
 	defaultLanguage: Locale;
+	timeouts = new HashMap();
 
 	constructor(defaultLanguage: Locale) {
 		this.defaultLanguage = defaultLanguage;
@@ -31,13 +33,27 @@ export default class CommandManager<T extends Locale> {
 		return this;
 	}
 
-	async handleInteraction(interaction: ChatInputCommandInteraction): Promise<void> {
+	async handleInteraction(interaction: ChatInputCommandInteraction): Promise<any> {
 		const command = this.commands.get(
 			interaction.commandName.toLowerCase()
 		);
 
 		if (!command) {
 			return;
+		}
+
+		if (command.timeout > 0) {
+			const until = this.timeouts.get(`${interaction.commandName.toLowerCase()}#${interaction.user.id}`);
+			const now = Math.trunc(Date.now() / 1000);
+
+			if (until && until > now) {
+				return await interaction.reply({
+					content: `Please wait until <t:${until}:R> before using this command again!`,
+					ephemeral: true,
+				});
+			}
+
+			this.timeouts.set(interaction.user.id, now);
 		}
 
 		const options: {

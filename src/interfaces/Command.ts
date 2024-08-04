@@ -103,6 +103,7 @@ interface CommandOptions<T extends CommandOption[], L extends Locale> {
 	options?: T;
 	execute: CommandExecutor<InferOptions<T, L>>;
 	defaultLocale?: L;
+	timeout?: number;
 }
 
 type CommandExecutor<T = {}> = (

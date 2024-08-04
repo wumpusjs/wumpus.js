@@ -24,6 +24,7 @@ export default class Command<T extends CommandOption[], L extends Locale> {
 	execute: CommandExecutor<InferOptions<T, L>>;
 	defaultLocale: LocaleString;
 	options: InferOptions<T, L>;
+	timeout = -1;
 
 	constructor(options: CommandOptions<T, L>) {
 		if (options.name) {
@@ -43,6 +44,7 @@ export default class Command<T extends CommandOption[], L extends Locale> {
 		this.execute = options.execute;
 		this.defaultLocale = options.defaultLocale || "en-US";
 		this.options = options.options as InferOptions<T, L>;
+		this.timeout = Math.max(Math.trunc(Number(options.timeout)), -1) ?? -1;
 	}
 
 	addName(locale: Locale, name: string): this {
