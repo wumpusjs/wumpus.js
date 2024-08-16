@@ -11,6 +11,7 @@ import CommandManager from "../classes/CommandManager";
 import path from "path";
 import { SHA256 } from "./crypto";
 import TempManager from "../classes/TempManager";
+import Command from "../classes/Command";
 
 export const getCommands = () =>
 	getFiles("./src/commands", ["ts", "js"], ["node_modules"]);
@@ -32,6 +33,12 @@ export async function loadCommands(
 			"src/commands",
 			command
 		));
+
+		if (!(exportedContent instanceof Command))
+			return error(
+				`Failed to load command ${command}, it does not export a Command instance`
+			);
+
 		client.command.addCommand(exportedContent);
 	});
 }
