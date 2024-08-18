@@ -1,3 +1,5 @@
+import "reflect-metadata"
+
 import { Client, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { loadCommands, putCommands } from './utils/command';
@@ -5,6 +7,9 @@ import { loadEvents } from './utils/event';
 import TempManager from './classes/TempManager';
 import { loadMiddlewares } from './utils/middlewares';
 import MiddlewareManager from './classes/MiddlewareManager';
+import { parseENV } from './utils/env';
+import { attachDataSource } from "./utils/database";
+import { DataSource } from "typeorm";
 
 dotenv.config();
 
@@ -17,6 +22,10 @@ const client = new Client({
 async function main() {
 	client.temp = new TempManager();
 	await client.temp.load();
+
+	parseENV();
+
+	await attachDataSource(client as Client & { datasource: DataSource; temp: TempManager });
 	
 	await loadMiddlewares(client as Client & { middleware: MiddlewareManager, temp: TempManager });
 	await loadCommands(client as Client & { command: any; temp: TempManager });

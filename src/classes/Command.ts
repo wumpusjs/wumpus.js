@@ -17,16 +17,19 @@ import {
 	SpecificCommandOption,
 } from "../interfaces/Command";
 import { error } from "../utils/logger";
+import { Repository } from "typeorm";
+import { EntityClassOrSchema, EntityInstanceType } from "../utils/typeorm";
 
-export default class Command<T extends CommandOption[], L extends Locale> {
+export default class Command<T extends CommandOption[], L extends Locale, R extends EntityClassOrSchema[]> {
 	name: Map<Locale, string> = new Map();
 	description: Map<Locale, string> = new Map();
-	execute: CommandExecutor<InferOptions<T, L>>;
+	execute: CommandExecutor<InferOptions<T, L>, Repository<R[number]>[]>;
 	defaultLocale: LocaleString;
 	options: InferOptions<T, L>;
 	timeout = -1;
+    repositories?: R;
 
-	constructor(options: CommandOptions<T, L>) {
+	constructor(options: CommandOptions<T, L, R>) {
 		if (options.name) {
 			for (const [locale, name] of Object.entries(options.name)) {
 				this.addName(locale as Locale, name);
@@ -41,10 +44,14 @@ export default class Command<T extends CommandOption[], L extends Locale> {
 			}
 		}
 
-		this.execute = options.execute;
+		this.execute = options.execute as any;
 		this.defaultLocale = options.defaultLocale || "en-US";
 		this.options = options.options as InferOptions<T, L>;
 		this.timeout = Math.max(Math.trunc(Number(options.timeout)), -1) ?? -1;
+
+		if (options.repositories) {
+            this.repositories = options.repositories;
+		}
 	}
 
 	addName(locale: Locale, name: string): this {
