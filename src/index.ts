@@ -14,7 +14,7 @@ import ButtonManager from './classes/ButtonManager';
 dotenv.config();
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent],
+	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent],
 }) as Client & {
 	temp: TempManager;
 };

@@ -17,7 +17,6 @@ export default class MiddlewareManager {
             this.client.on(middleware.event, (...args: any[]) =>
                 this.handleEvent(middleware.event, ...(args as any))
             );
-			console.log('event', middleware.event);
         }
         this.middlewares.set(middleware.event, [...middlewares, middleware]);
 
@@ -30,8 +29,6 @@ export default class MiddlewareManager {
     ): void {
         const middlewares = [...(this.middlewares.get(event) || [])];
 
-		console.log('middleware', middlewares.map(x => x.handler.toString()));
-
         const next = async () => {
             const middleware = middlewares.shift();
 
@@ -40,8 +37,18 @@ export default class MiddlewareManager {
             }
 
             const exec = middleware.handler(args, next);
-			const result = await exec instanceof Promise ? exec : Promise.resolve(exec);
+			const result = await (exec instanceof Promise ? exec : Promise.resolve(exec));
             
+            if (middleware.once) {
+                const list = this.middlewares.get(event) || [];
+                const index = list.findIndex((m) => m === middleware);
+
+                if (index !== -1) {
+                    list.splice(index, 1);
+                    this.middlewares.set(event, list);
+                }
+            }
+
             if (result !== undefined) {
                 return result;
             }

@@ -9,10 +9,9 @@ import { error } from '../utils/logger';
 import Command from './Command';
 import { CommandOption } from '../interfaces/Command';
 import { HashMap } from '../utils/map';
-import { DataSource, EntitySchema, Repository } from 'typeorm';
+import {Repository } from 'typeorm';
 import {
 	EntityClassOrSchema,
-	EntityInstanceType,
 	getRepositoryToken,
 } from '../utils/typeorm';
 
@@ -25,8 +24,6 @@ export default class CommandManager<
 	commands: Map<string, Command<T, L, R>> = new Map();
 	defaultLanguage: Locale;
 	timeouts = new HashMap();
-	repositories: Map<string, Repository<EntityInstanceType<R[number]>>> =
-		new Map();
 
 	constructor(client: Client, defaultLanguage: Locale) {
 		this.client = client;
@@ -49,35 +46,6 @@ export default class CommandManager<
 		}
 
 		this.commands.set(name.toLowerCase(), exportedContent);
-
-		if (exportedContent.repositories) {
-			for (const entity of exportedContent.repositories) {
-				if (!entity) {
-					continue;
-				}
-
-				const token = getRepositoryToken(entity as any);
-
-				if (typeof token !== 'string') {
-					error('Invalid repository token');
-					process.exit(1);
-				}
-
-				if (!this.repositories.has(token)) {
-					const repository = (
-						this.client as Client & { datasource: DataSource }
-					).datasource.getRepository(
-						entity instanceof EntitySchema
-							? entity
-							: (entity as {
-									new (): EntityInstanceType<typeof entity>;
-							  })
-					) as Repository<EntityInstanceType<typeof entity>>;
-
-					this.repositories.set(token, repository);
-				}
-			}
-		}
 
 		return this;
 	}
@@ -174,12 +142,12 @@ export default class CommandManager<
 					process.exit(1);
 				}
 
-				if (!this.repositories.has(token)) {
+				if (!this.client.repositories.has(token)) {
 					error('Repository not found');
 					process.exit(1);
 				}
 
-				repositories.push(this.repositories.get(token)!);
+				repositories.push(this.client.repositories.get(token)!);
 			}
 		}
 

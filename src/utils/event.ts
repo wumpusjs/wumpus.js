@@ -3,6 +3,7 @@ import { getFiles } from './file';
 import { error, warn } from './logger';
 import path from 'path';
 import Event from '../classes/Event';
+import Middleware from '../classes/Middleware';
 
 export const getEvents = () =>
 	getFiles('./src/events', ['ts', 'js'], ['node_modules'], false);
@@ -25,14 +26,12 @@ export async function loadEvents(client: Client) {
 		if (!(exportedContent instanceof Event))
 			return error('Invalid event export:', event);
 
-		if (exportedContent.once) {
-			client.once(exportedContent.event as any, (...args: any[]) =>
-				exportedContent.execute(...args)
-			);
-		} else {
-			client.on(exportedContent.event as any, (...args: any[]) =>
-				exportedContent.execute(...args)
-			);
-		}
+		client.middleware.addMiddleware(
+			new Middleware(
+				exportedContent.event,
+				(args) => exportedContent.execute(...args),
+				!!exportedContent.once
+			)
+		);
 	});
 }

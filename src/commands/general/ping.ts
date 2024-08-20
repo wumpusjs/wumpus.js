@@ -28,26 +28,6 @@ export default new Command({
 	] as const,
 	repositories: [User] as const,
 	execute: async (interaction, options, userRepository) => {
-		const user = await userRepository.findOne({
-			where: {
-				id: options.user.id,
-			},
-		});
-
-		if (!user) {
-			await interaction.reply({
-				content: 'User not found!',
-				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						(await interaction.client.buttons.create(TestButton, {
-							test: 'test',
-						})) as ButtonBuilder
-					),
-				],
-			});
-			return;
-		}
-
 		await interaction.reply('Pong! ' + options.user.tag);
 	},
 	defaultLocale: Locale.EnglishUS,
