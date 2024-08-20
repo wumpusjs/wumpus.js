@@ -1,4 +1,4 @@
-import { ClientEvents, Events } from 'discord.js';
+import { ClientEvents } from 'discord.js';
 import { MiddlewareHandler } from '../interfaces/Middleware';
 
 export default class Middleware<T extends keyof ClientEvents> {

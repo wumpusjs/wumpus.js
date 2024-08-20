@@ -1,11 +1,17 @@
 import {
-	Locale, LocaleString, SlashCommandBuilder,
-	SlashCommandStringOption, SlashCommandRoleOption,
-	SlashCommandUserOption, SlashCommandNumberOption,
-	SlashCommandBooleanOption, SlashCommandChannelOption,
-	SlashCommandIntegerOption, SlashCommandAttachmentOption,
-	SlashCommandMentionableOption
-} from "discord.js";
+	Locale,
+	LocaleString,
+	SlashCommandBuilder,
+	SlashCommandStringOption,
+	SlashCommandRoleOption,
+	SlashCommandUserOption,
+	SlashCommandNumberOption,
+	SlashCommandBooleanOption,
+	SlashCommandChannelOption,
+	SlashCommandIntegerOption,
+	SlashCommandAttachmentOption,
+	SlashCommandMentionableOption,
+} from 'discord.js';
 import {
 	CommandExecutor,
 	CommandOption,
@@ -15,19 +21,23 @@ import {
 	OptionBuilder,
 	OptionTypes,
 	SpecificCommandOption,
-} from "../interfaces/Command";
-import { error } from "../utils/logger";
-import { Repository } from "typeorm";
-import { EntityClassOrSchema, EntityInstanceType } from "../utils/typeorm";
+} from '../interfaces/Command';
+import { error } from '../utils/logger';
+import { Repository } from 'typeorm';
+import { EntityClassOrSchema } from '../utils/typeorm';
 
-export default class Command<T extends CommandOption[], L extends Locale, R extends EntityClassOrSchema[]> {
+export default class Command<
+	T extends CommandOption[],
+	L extends Locale,
+	R extends EntityClassOrSchema[]
+> {
 	name: Map<Locale, string> = new Map();
 	description: Map<Locale, string> = new Map();
 	execute: CommandExecutor<InferOptions<T, L>, Repository<R[number]>[]>;
 	defaultLocale: LocaleString;
 	options: InferOptions<T, L>;
 	timeout = -1;
-    repositories?: R;
+	repositories?: R;
 
 	constructor(options: CommandOptions<T, L, R>) {
 		if (options.name) {
@@ -45,12 +55,12 @@ export default class Command<T extends CommandOption[], L extends Locale, R exte
 		}
 
 		this.execute = options.execute as any;
-		this.defaultLocale = options.defaultLocale || "en-US";
+		this.defaultLocale = options.defaultLocale || 'en-US';
 		this.options = options.options as InferOptions<T, L>;
 		this.timeout = Math.max(Math.trunc(Number(options.timeout)), -1) ?? -1;
 
 		if (options.repositories) {
-            this.repositories = options.repositories;
+			this.repositories = options.repositories;
 		}
 	}
 
@@ -93,13 +103,19 @@ export default class Command<T extends CommandOption[], L extends Locale, R exte
 			.setName(this.getName(locale) || this.name.values().next().value!)
 			.setDescription(
 				this.getDescription(locale) ||
-				this.description.values().next().value!
+					this.description.values().next().value!
 			);
 
-		for (const option of this.options as (Omit<CommandOption, 'type'> & { type: OptionTypes })[]) {
+		for (const option of this.options as (Omit<CommandOption, 'type'> & {
+			type: OptionTypes;
+		})[]) {
 			const [identifier, data] = Object.entries(option).reduce(
 				(acc, [key, value]) => {
-					acc[+!['type', 'name', 'description', 'required'].includes(key)][key] = value;
+					acc[
+						+!['type', 'name', 'description', 'required'].includes(
+							key
+						)
+					][key] = value;
 					return acc;
 				},
 				[{}, {}] as {
@@ -108,32 +124,95 @@ export default class Command<T extends CommandOption[], L extends Locale, R exte
 			) as [GlobalCommandOptions, SpecificCommandOption<OptionTypes>];
 
 			switch (option.type) {
-				case "STRING":
-					command.addStringOption(this.buildOption<"STRING">(locale!, option.type, identifier, data));
+				case 'STRING':
+					command.addStringOption(
+						this.buildOption<'STRING'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "BOOLEAN":
-					command.addBooleanOption(this.buildOption<"BOOLEAN">(locale!, option.type, identifier, data));
+				case 'BOOLEAN':
+					command.addBooleanOption(
+						this.buildOption<'BOOLEAN'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "CHANNEL":
-					command.addChannelOption(this.buildOption<"CHANNEL">(locale!, option.type, identifier, data));
+				case 'CHANNEL':
+					command.addChannelOption(
+						this.buildOption<'CHANNEL'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "INTEGER":
-					command.addIntegerOption(this.buildOption<"INTEGER">(locale!, option.type, identifier, data));
+				case 'INTEGER':
+					command.addIntegerOption(
+						this.buildOption<'INTEGER'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "NUMBER":
-					command.addNumberOption(this.buildOption<"NUMBER">(locale!, option.type, identifier, data));
+				case 'NUMBER':
+					command.addNumberOption(
+						this.buildOption<'NUMBER'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "ROLE":
-					command.addRoleOption(this.buildOption<"ROLE">(locale!, option.type, identifier, data));
+				case 'ROLE':
+					command.addRoleOption(
+						this.buildOption<'ROLE'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "USER":
-					command.addUserOption(this.buildOption<"USER">(locale!, option.type, identifier, data));
+				case 'USER':
+					command.addUserOption(
+						this.buildOption<'USER'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "ATTACHMENT":
-					command.addAttachmentOption(this.buildOption<"ATTACHMENT">(locale!, option.type, identifier, data));
+				case 'ATTACHMENT':
+					command.addAttachmentOption(
+						this.buildOption<'ATTACHMENT'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
-				case "MENTIONABLE":
-					command.addMentionableOption(this.buildOption<"MENTIONABLE">(locale!, option.type, identifier, data));
+				case 'MENTIONABLE':
+					command.addMentionableOption(
+						this.buildOption<'MENTIONABLE'>(
+							locale!,
+							option.type,
+							identifier,
+							data
+						)
+					);
 					break;
 				default:
 					error(`Invalid option type: ${option.type}`);
@@ -150,27 +229,35 @@ export default class Command<T extends CommandOption[], L extends Locale, R exte
 		identifier: GlobalCommandOptions,
 		data: SpecificCommandOption<T>
 	): OptionBuilder<T> {
-		const option = ({
-			'STRING': () => new SlashCommandStringOption(),
-			'BOOLEAN': () => new SlashCommandBooleanOption(),
-			'CHANNEL': () => new SlashCommandChannelOption(),
-			'INTEGER': () => new SlashCommandIntegerOption(),
-			'NUMBER': () => new SlashCommandNumberOption(),
-			'ROLE': () => new SlashCommandRoleOption(),
-			'USER': () => new SlashCommandUserOption(),
-			'ATTACHMENT': () => new SlashCommandAttachmentOption(),
-			'MENTIONABLE': () => new SlashCommandMentionableOption(),
-		} as {
+		const option = (
+			{
+				STRING: () => new SlashCommandStringOption(),
+				BOOLEAN: () => new SlashCommandBooleanOption(),
+				CHANNEL: () => new SlashCommandChannelOption(),
+				INTEGER: () => new SlashCommandIntegerOption(),
+				NUMBER: () => new SlashCommandNumberOption(),
+				ROLE: () => new SlashCommandRoleOption(),
+				USER: () => new SlashCommandUserOption(),
+				ATTACHMENT: () => new SlashCommandAttachmentOption(),
+				MENTIONABLE: () => new SlashCommandMentionableOption(),
+			} as {
 				[K in OptionTypes]: () => OptionBuilder<K>;
-			})?.[type]?.();
+			}
+		)?.[type]?.();
 
 		if (!option) {
 			error(`Invalid option type: ${type}`);
 			process.exit(1);
 		}
 
-		option.setName(identifier.name[locale] || identifier.name[this.defaultLocale as Locale]!);
-		option.setDescription(identifier.description[locale] || identifier.description[this.defaultLocale as Locale]!);
+		option.setName(
+			identifier.name[locale] ||
+				identifier.name[this.defaultLocale as Locale]!
+		);
+		option.setDescription(
+			identifier.description[locale] ||
+				identifier.description[this.defaultLocale as Locale]!
+		);
 		option.setRequired(!!identifier.required);
 
 		option.setNameLocalizations(identifier.name);

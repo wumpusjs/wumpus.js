@@ -1,4 +1,4 @@
-import { Client, ClientEvents, Events } from 'discord.js';
+import { Client, ClientEvents } from 'discord.js';
 import Middleware from './Middleware';
 
 export default class MiddlewareManager {

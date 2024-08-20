@@ -1,8 +1,11 @@
 export class HashMap {
-	buckets: Map<string, {
-		key: string,
-		value: any
-	}[]> = new Map();
+	buckets: Map<
+		string,
+		{
+			key: string;
+			value: any;
+		}[]
+	> = new Map();
 
 	constructor() {
 		this.buckets = new Map();
@@ -43,6 +46,8 @@ export class HashMap {
 	}
 
 	get(key: string) {
-		return this.buckets.get(this._hash(key).toString())?.find((item) => item.key === key)?.value;
+		return this.buckets
+			.get(this._hash(key).toString())
+			?.find((item) => item.key === key)?.value;
 	}
 }

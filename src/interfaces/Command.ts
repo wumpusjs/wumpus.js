@@ -17,7 +17,8 @@ import {
 	Attachment,
 } from 'discord.js';
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
-import { BaseEntity, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
+import { Client } from '../types/discord';
 
 export type OptionTypes =
 	| 'ATTACHMENT'
@@ -135,11 +136,19 @@ interface CommandOptions<
 	defaultLocale?: L;
 	timeout?: number;
 	repositories?: R;
-	execute: CommandExecutor<InferOptions<T, L>, Repository<EntityInstanceType<R[number]>>[]>;
+	execute: CommandExecutor<
+		InferOptions<T, L>,
+		Repository<EntityInstanceType<R[number]>>[]
+	>;
 }
 
-type CommandExecutor<T = {}, R extends Repository<EntityInstanceType<EntityClassOrSchema>>[] = []> = (
-	interaction: ChatInputCommandInteraction,
+type CommandExecutor<
+	T = {},
+	R extends Repository<EntityInstanceType<EntityClassOrSchema>>[] = []
+> = (
+	interaction: ChatInputCommandInteraction & {
+		client: Client;
+	},
 	options: T,
 	...repositories: R
 ) => Promise<any>;

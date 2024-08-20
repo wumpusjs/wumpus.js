@@ -1,4 +1,4 @@
-import { glob } from "glob";
+import { glob } from 'glob';
 
 export function getFiles(
 	path: string,
@@ -11,11 +11,11 @@ export function getFiles(
 		files: string[];
 	}>(async (resolve) => {
 		try {
-			let dir = `${allowDirectories ? "**/*" : "*"}`;
-			dir += ".";
+			let dir = `${allowDirectories ? '**/*' : '*'}`;
+			dir += '.';
 			if (extensions.length === 1) dir += extensions[0];
-			else if (extensions.length === 0) dir += "*";
-			else dir += `{${extensions.join(",")}}`;
+			else if (extensions.length === 0) dir += '*';
+			else dir += `{${extensions.join(',')}}`;
 
 			const files = await glob(dir, {
 				ignore,

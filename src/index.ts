@@ -1,6 +1,6 @@
-import "reflect-metadata"
+import 'reflect-metadata';
 
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, Locale } from 'discord.js';
 import dotenv from 'dotenv';
 import { loadCommands, putCommands } from './utils/command';
 import { loadEvents } from './utils/event';
@@ -8,8 +8,8 @@ import TempManager from './classes/TempManager';
 import { loadMiddlewares } from './utils/middlewares';
 import MiddlewareManager from './classes/MiddlewareManager';
 import { parseENV } from './utils/env';
-import { attachDataSource } from "./utils/database";
-import { DataSource } from "typeorm";
+import Database from './classes/Database';
+import ButtonManager from './classes/ButtonManager';
 
 dotenv.config();
 
@@ -25,13 +25,17 @@ async function main() {
 
 	parseENV();
 
-	await attachDataSource(client as Client & { datasource: DataSource; temp: TempManager });
-	
-	await loadMiddlewares(client as Client & { middleware: MiddlewareManager, temp: TempManager });
+	await new Database(client as any).initialize();
+
+	await loadMiddlewares(
+		client as Client & { middleware: MiddlewareManager; temp: TempManager }
+	);
 	await loadCommands(client as Client & { command: any; temp: TempManager });
 	await loadEvents(client);
 
 	await putCommands(client, (client as any).command.getCommandsJSON());
+
+	await new ButtonManager(client as any, Locale.EnglishUS).initialize();
 
 	client.login(process.env.TOKEN);
 }

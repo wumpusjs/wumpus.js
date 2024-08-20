@@ -4,11 +4,10 @@ import {
 	Client,
 	Locale,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
-	SlashCommandBuilder,
 } from 'discord.js';
 import { error } from '../utils/logger';
 import Command from './Command';
-import { CommandOption, OptionTypes } from '../interfaces/Command';
+import { CommandOption } from '../interfaces/Command';
 import { HashMap } from '../utils/map';
 import { DataSource, EntitySchema, Repository } from 'typeorm';
 import {

@@ -15,10 +15,10 @@ export type EntityInstanceType<E extends EntityClassOrSchema> = E extends {
 	? U
 	: never;
 
-export const InjectRepository = (
+/* export const InjectRepository = (
 	entity: EntityClassOrSchema,
 	dataSource: string = 'default'
-): ReturnType<typeof Inject> => Inject(getRepositoryToken(entity, dataSource));
+): ReturnType<typeof Inject> => Inject(getRepositoryToken(entity, dataSource)); */
 
 export function getRepositoryToken(
 	entity: EntityClassOrSchema,
@@ -64,7 +64,7 @@ export function getDataSourcePrefix(
 	return dataSource.name + '_';
 }
 
-export function Inject<T = any>(
+/* export function Inject<T = any>(
 	token?: T
 ): PropertyDecorator & ParameterDecorator {
 	return (
@@ -102,4 +102,4 @@ export function Inject<T = any>(
 			target.constructor
 		);
 	};
-}
+} */

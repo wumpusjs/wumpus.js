@@ -25,7 +25,8 @@ export async function loadCommands(
 
 	if (!commands.files.length) return warn('No commands found');
 
-	if (!client.command) client.command = new CommandManager(client, Locale.EnglishUS);
+	if (!client.command)
+		client.command = new CommandManager(client, Locale.EnglishUS);
 
 	commands.files.forEach((command) => {
 		const { default: exportedContent } = require(path.join(

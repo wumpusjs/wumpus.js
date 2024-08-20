@@ -1,7 +1,7 @@
-import { Locale } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, Locale } from 'discord.js';
 import Command from '../../classes/Command';
-import { Repository } from 'typeorm';
 import User from '../../entity/User';
+import TestButton from '../../buttons/test';
 
 export default new Command({
 	name: {
@@ -35,10 +35,19 @@ export default new Command({
 		});
 
 		if (!user) {
-			await interaction.reply('User not found!');
+			await interaction.reply({
+				content: 'User not found!',
+				components: [
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						(await interaction.client.buttons.create(TestButton, {
+							test: 'test',
+						})) as ButtonBuilder
+					),
+				],
+			});
 			return;
 		}
-		
+
 		await interaction.reply('Pong! ' + options.user.tag);
 	},
 	defaultLocale: Locale.EnglishUS,
