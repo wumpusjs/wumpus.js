@@ -34,33 +34,4 @@ export default class Button<
 		this.execute = options.execute;
 		this.style = options.style || ButtonStyle.Primary;
 	}
-	/* 
-	async createButton(
-		client: Client & {
-			repositories: Map<
-				string,
-				Repository<EntityInstanceType<R[number]>>
-			>;
-		},
-		data: InferOptions<T, L>,
-		locale?: Locale
-	): Promise<ButtonBuilder> {
-		const button = (
-			client.command as CommandManager<any, any, any>
-		).repositories.get('ButtonRepository') as Repository<ButtonEntity>;
-
-		const builder = new ButtonBuilder()
-			.setCustomId(RANDOM_STRING(16))
-			.setLabel(
-				this.labels[locale || this.defaultLocale] ||
-					this.labels[this.defaultLocale] ||
-					'Unnamed Button'
-			)
-			.setStyle(this.style)
-			.setDisabled(false);
-
-		if (this.emoji) builder.setEmoji(this.emoji);
-
-		return builder;
-	} */
 }

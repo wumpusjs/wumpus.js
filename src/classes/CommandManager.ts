@@ -9,11 +9,8 @@ import { error } from '../utils/logger';
 import Command from './Command';
 import { CommandOption } from '../interfaces/Command';
 import { HashMap } from '../utils/map';
-import {Repository } from 'typeorm';
-import {
-	EntityClassOrSchema,
-	getRepositoryToken,
-} from '../utils/typeorm';
+import { Repository } from 'typeorm';
+import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 
 export default class CommandManager<
 	T extends CommandOption[],

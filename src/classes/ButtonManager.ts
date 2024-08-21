@@ -1,15 +1,6 @@
-import {
-	BaseChannel,
-	ButtonBuilder,
-	ButtonInteraction,
-	Client,
-	GuildMember,
-	Locale,
-	Role,
-	User,
-} from 'discord.js';
+import { ButtonBuilder, ButtonInteraction, Client, Locale } from 'discord.js';
 import Button from './Button';
-import { InferOptions, OptionTypes } from '../interfaces/Button';
+import { InferOptions } from '../interfaces/Button';
 import { Repository } from 'typeorm';
 import ButtonEntity from '../entity/Button';
 import { RANDOM_STRING } from '../utils/crypto';
@@ -17,6 +8,7 @@ import { getFiles } from '../utils/file';
 import { error } from '../utils/logger';
 import path from 'path';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
+import { packet, resolve, validate } from '../utils/data';
 
 export default class ButtonManager {
 	client: Client & { buttons: ButtonManager };
@@ -79,9 +71,7 @@ export default class ButtonManager {
 		locale?: Locale
 	) {
 		try {
-			const buttonRepo = (this.client as any).repositories.get(
-				'ButtonRepository'
-			) as Repository<ButtonEntity>;
+			const buttonRepo = this.client.repository('ButtonRepository');
 
 			const entity = new ButtonEntity();
 
@@ -89,43 +79,16 @@ export default class ButtonManager {
 			entity.identifier = specified.identifier;
 			entity.data = [];
 
-			const typeChecker = (type: OptionTypes) =>
-				({
-					STRING: (field: string) => typeof field === 'string',
-					BOOLEAN: (field: boolean) => !!field === field,
-					CHANNEL: (field: BaseChannel) =>
-						field instanceof BaseChannel,
-					INTEGER: (field: number) =>
-						!isNaN(field) && field % 1 === 0,
-					NUMBER: (field: number) => !isNaN(field),
-					ROLE: (field: Role) => field instanceof Role,
-					USER: (field: User) => field instanceof User,
-					MEMBER: (field: GuildMember) =>
-						field instanceof GuildMember,
-				}[type] as (field: any) => boolean);
-
-			const convert = (type: OptionTypes) =>
-				({
-					STRING: (field: string) => field,
-					BOOLEAN: (field: boolean) => field.toString(),
-					CHANNEL: (field: BaseChannel) => field.id,
-					INTEGER: (field: number) => field.toString(),
-					NUMBER: (field: number) => field.toString(),
-					ROLE: (field: Role) => field.id,
-					USER: (field: User) => field.id,
-					MEMBER: (field: GuildMember) => field.id,
-				}[type] as (field: any) => string);
-
 			for (const field of specified.fields ?? []) {
 				if (
 					!data[field.name] ||
-					!typeChecker(field.type)(data[field.name])
+					!validate[field.type](data[field.name])
 				) {
 					throw new Error(`Invalid field: ${field.name}`);
 				}
 
 				entity.data.push(
-					`${field.name}=${convert(field.type)(data[field.name])}`
+					`${field.name}=${packet[field.type](data[field.name])}`
 				);
 			}
 
@@ -190,31 +153,11 @@ export default class ButtonManager {
 					continue;
 				}
 
-				const convert = (type: OptionTypes) =>
-					({
-						STRING: (field: string) => Promise.resolve(field),
-						BOOLEAN: (field: string) =>
-							Promise.resolve(field === 'true'),
-						CHANNEL: (field: string) =>
-							this.client.channels.fetch(field),
-						INTEGER: (field: string) =>
-							Promise.resolve(parseInt(field)),
-						NUMBER: (field: string) =>
-							Promise.resolve(parseFloat(field)),
-						ROLE: (field: string) =>
-							this.client.guilds
-								.fetch(interaction.guild?.id!)
-								.then((g) => g.roles.fetch(field)),
-						USER: (field: string) => this.client.users.fetch(field),
-						MEMBER: (field: string) =>
-							this.client.guilds
-								.fetch(interaction.guild?.id!)
-								.then((g) => g.members.fetch(field)),
-					}[type] as (field: string) => any);
-
 				promises.push(
 					Promise.resolve(
-						convert(field.type)(value.split('=').slice(1).join('='))
+						resolve(interaction.client, interaction.guild?.id)[
+							field.type
+						](value.split('=').slice(1).join('='))
 					).then((value) => {
 						data[field.name] = value;
 					})

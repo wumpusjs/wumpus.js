@@ -1,4 +1,4 @@
-import { ClientEvents, Embed } from 'discord.js';
+import { ClientEvents } from 'discord.js';
 
 type Promised<T extends any> = Promise<T> | T;
 

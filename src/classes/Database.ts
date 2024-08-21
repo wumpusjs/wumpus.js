@@ -23,6 +23,8 @@ export default class Database {
 				path.join(__dirname, '../') + `**${sep}entity${sep}*{.ts,.js}`,
 			],
 		});
+		(this.client as any).repository = (name: string) =>
+			(this.client as any).repositories.get(name);
 	}
 
 	async initialize() {

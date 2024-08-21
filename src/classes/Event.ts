@@ -1,4 +1,4 @@
-import { ClientEvents } from "discord.js";
+import { ClientEvents } from 'discord.js';
 
 interface EventOptions<Event extends keyof ClientEvents> {
 	once?: boolean;

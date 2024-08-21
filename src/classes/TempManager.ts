@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { getFiles } from "../utils/file";
-import { error, info, warn } from "../utils/logger";
+import fs from 'fs';
+import path from 'path';
+import { getFiles } from '../utils/file';
+import { error, info, warn } from '../utils/logger';
 
 interface ITempOptions {
 	dir: string;
@@ -15,7 +15,7 @@ export default class TempManager {
 
 	constructor(options?: ITempOptions) {
 		this.options = {
-			dir: options?.dir || path.join(process.cwd(), ".temp"),
+			dir: options?.dir || path.join(process.cwd(), '.temp'),
 			values: options?.values || {},
 		};
 
@@ -23,7 +23,10 @@ export default class TempManager {
 			fs.mkdirSync(this.options.dir);
 		}
 
-		if (this.options.values === undefined || Object.keys(this.options.values).length !== 10) {
+		if (
+			this.options.values === undefined ||
+			Object.keys(this.options.values).length !== 10
+		) {
 			for (let i = 0; i < 10; i++) {
 				this.options.values[i] = new Map();
 			}
@@ -31,7 +34,12 @@ export default class TempManager {
 	}
 
 	async load() {
-		const result = await getFiles(this.options.dir, ["tmp"], ["node_modules"], true);
+		const result = await getFiles(
+			this.options.dir,
+			['tmp'],
+			['node_modules'],
+			true
+		);
 
 		if (!result.success) return false;
 
@@ -41,11 +49,11 @@ export default class TempManager {
 			try {
 				const filePath = path.join(this.options.dir, file);
 
-				const data = fs.readFileSync(filePath, "utf-8");
+				const data = fs.readFileSync(filePath, 'utf-8');
 				const json = JSON.parse(data);
 
 				if (
-					typeof json !== "object" ||
+					typeof json !== 'object' ||
 					json === null ||
 					!Array.isArray(json)
 				) {
@@ -63,7 +71,7 @@ export default class TempManager {
 			}
 		}
 
-		info("Temp files loaded successfully!");
+		info('Temp files loaded successfully!');
 
 		return true;
 	}
@@ -79,8 +87,10 @@ export default class TempManager {
 		try {
 			if (save) {
 				const filePath = path.join(this.options.dir, `${hash}.tmp`);
-				const data = JSON.stringify([...this.options.values?.[hash]?.entries()]);
-	
+				const data = JSON.stringify([
+					...this.options.values?.[hash]?.entries(),
+				]);
+
 				fs.writeFileSync(filePath, data);
 			}
 		} catch (error) {
