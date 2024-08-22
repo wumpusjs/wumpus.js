@@ -10,38 +10,55 @@ import MiddlewareManager from './classes/MiddlewareManager';
 import { parseENV } from './utils/env';
 import Database from './classes/Database';
 import ButtonManager from './classes/ButtonManager';
+import WumpusStructure from './structures/wumpus';
+import { Repository } from 'typeorm';
+import { RepositoriesMap } from './interfaces/repositories';
+import CommandManager from './classes/CommandManager';
 
 dotenv.config();
 
-const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-	],
-}) as Client & {
+class Wumpus implements WumpusStructure {
+	instance: Client;
 	temp: TempManager;
-};
+	repositories = new Map();
+	middleware: MiddlewareManager;
+	command: CommandManager<any, any, any>;
+	buttons: ButtonManager;
+	database: Database;
 
-async function main() {
-	client.temp = new TempManager();
-	await client.temp.load();
+	constructor() {
+		this.instance = new Client({
+			intents: [
+				GatewayIntentBits.Guilds,
+				GatewayIntentBits.GuildMessages,
+				GatewayIntentBits.MessageContent,
+			],
+		});
+		this.database = new Database(this);
+		this.temp = new TempManager();
+		this.middleware = new MiddlewareManager(this);
+		this.buttons = new ButtonManager(this, Locale.EnglishUS);
+		this.command = new CommandManager(this, Locale.EnglishUS);
+	}
 
-	parseENV();
+	async init() {
+		this.temp.load();
 
-	await new Database(client as any).initialize();
+		parseENV();
 
-	await loadMiddlewares(
-		client as Client & { middleware: MiddlewareManager; temp: TempManager }
-	);
-	await loadCommands(client as Client & { command: any; temp: TempManager });
-	await loadEvents(client);
+		await new Database(this as any).initialize();
+		await loadMiddlewares(this);
+		await loadCommands(this);
+		await loadEvents(this);
 
-	await putCommands(client, (client as any).command.getCommandsJSON());
+		await putCommands(this, this.command.getCommandsJSON());
 
-	await new ButtonManager(client as any, Locale.EnglishUS).initialize();
+		await this.buttons.initialize();
+	}
 
-	client.login(process.env.TOKEN);
+	repository<T extends keyof RepositoriesMap>(
+		name: T
+	): Repository<RepositoriesMap[T]> {
+		return this.repositories.get(name);
+	}
 }
-
-main();

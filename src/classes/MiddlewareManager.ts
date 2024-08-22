@@ -1,11 +1,12 @@
-import { Client, ClientEvents } from 'discord.js';
+import { ClientEvents } from 'discord.js';
 import Middleware from './Middleware';
+import Wumpus from '../structures/wumpus';
 
 export default class MiddlewareManager {
-	client: Client;
+	client: Wumpus;
 	middlewares: Map<keyof ClientEvents, Middleware<any>[]>;
 
-	constructor(client: Client) {
+	constructor(client: Wumpus) {
 		this.client = client;
 		this.middlewares = new Map();
 	}
@@ -14,7 +15,7 @@ export default class MiddlewareManager {
 		const middlewares = this.middlewares.get(middleware.event) || [];
 
 		if (middlewares.length < 1) {
-			this.client.on(middleware.event, (...args: any[]) =>
+			this.client.instance.on(middleware.event, (...args: any[]) =>
 				this.handleEvent(middleware.event, ...(args as any))
 			);
 		}
@@ -36,7 +37,7 @@ export default class MiddlewareManager {
 				return;
 			}
 
-			const exec = middleware.handler(args, next);
+			const exec = middleware.handler(args, next, this.client);
 			const result = await (exec instanceof Promise
 				? exec
 				: Promise.resolve(exec));

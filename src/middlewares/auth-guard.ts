@@ -3,10 +3,10 @@ import Middleware from '../classes/Middleware';
 
 export default new Middleware(
 	Events.InteractionCreate,
-	async ([interaction], next) => {
+	async ([interaction], next, client) => {
 		if (!interaction.isCommand()) return next();
 
-		const User = interaction.client.repository('UserRepository');
+		const User = client.repository('UserRepository');
 
 		if (!User) {
 			return await interaction.reply('Something went wrong');

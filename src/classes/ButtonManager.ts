@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonInteraction, Client, Locale } from 'discord.js';
+import { ButtonBuilder, ButtonInteraction, Locale } from 'discord.js';
 import Button from './Button';
 import { InferOptions } from '../interfaces/Button';
 import { Repository } from 'typeorm';
@@ -9,20 +9,16 @@ import { error } from '../utils/logger';
 import path from 'path';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 import { packet, resolve, validate } from '../utils/data';
+import Wumpus from '../structures/wumpus';
 
 export default class ButtonManager {
-	client: Client & { buttons: ButtonManager };
+	client: Wumpus;
 	defaultLocale: Locale;
 	buttons: Map<string, Button> = new Map();
 
-	constructor(
-		client: Client & { buttons: ButtonManager },
-		defaultLocale: Locale
-	) {
+	constructor(client: Wumpus, defaultLocale: Locale) {
 		this.client = client;
 		this.defaultLocale = defaultLocale;
-
-		(client as any).buttons = this;
 	}
 
 	async initialize() {
@@ -73,6 +69,11 @@ export default class ButtonManager {
 		try {
 			const buttonRepo = this.client.repository('ButtonRepository');
 
+			if (!buttonRepo) {
+				error('Button repository not found');
+				process.exit(1);
+			}
+
 			const entity = new ButtonEntity();
 
 			entity.id = RANDOM_STRING(32);
@@ -115,9 +116,12 @@ export default class ButtonManager {
 
 	async handle(interaction: ButtonInteraction) {
 		try {
-			const buttonRepo = (this.client as any).repositories.get(
-				'ButtonRepository'
-			) as Repository<ButtonEntity>;
+			const buttonRepo = this.client.repository('ButtonRepository');
+
+			if (!buttonRepo) {
+				error('Button repository not found');
+				process.exit(1);
+			}
 
 			const id = interaction.customId;
 
@@ -177,12 +181,14 @@ export default class ButtonManager {
 						process.exit(1);
 					}
 
-					if (!this.client.repositories.has(token)) {
+					if (!this.client.database.repositories.has(token)) {
 						error('Repository not found');
 						process.exit(1);
 					}
 
-					repositories.push(this.client.repositories.get(token)!);
+					repositories.push(
+						this.client.database.repositories.get(token)!
+					);
 				}
 			}
 

@@ -1,17 +1,19 @@
-import { Client } from 'discord.js';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import path, { sep } from 'path';
 import { error } from '../utils/logger';
 import { getRepositoryToken } from '../utils/typeorm';
 import { getFiles } from '../utils/file';
+import Wumpus from '../structures/wumpus';
+import { RepositoriesMap } from '../interfaces/repositories';
 
 export default class Database {
-	client: Client & { datasource: DataSource };
+	client: Wumpus;
+	datasource!: DataSource;
+	repositories: Map<string, Repository<any>> = new Map();
 
-	constructor(client: Client & { datasource: DataSource }) {
+	constructor(client: Wumpus) {
 		this.client = client;
-		(this.client as any).repositories = new Map();
-		client.datasource = new DataSource({
+		this.datasource = new DataSource({
 			type: 'mysql',
 			host: process.env.DATABASE_HOST,
 			port: parseInt(process.env.DATABASE_PORT!),
@@ -23,12 +25,10 @@ export default class Database {
 				path.join(__dirname, '../') + `**${sep}entity${sep}*{.ts,.js}`,
 			],
 		});
-		(this.client as any).repository = (name: string) =>
-			(this.client as any).repositories.get(name);
 	}
 
 	async initialize() {
-		await this.client.datasource.initialize().catch(() => {
+		await this.datasource.initialize().catch(() => {
 			error('Failed to connect to database');
 			process.exit(1);
 		});
@@ -48,8 +48,14 @@ export default class Database {
 			)).default;
 			const token = getRepositoryToken(entity as any);
 
-			const repository = this.client.datasource.getRepository(entity);
+			const repository = this.datasource.getRepository(entity);
 			(this.client as any).repositories.set(token, repository);
 		}
+	}
+
+	repository<T extends keyof RepositoriesMap>(
+		name: T
+	): Repository<RepositoriesMap[T]> | undefined {
+		return this.repositories.get(name);
 	}
 }

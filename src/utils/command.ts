@@ -1,5 +1,4 @@
 import {
-	Client,
 	Locale,
 	REST,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -10,15 +9,13 @@ import { error, info, success, warn } from './logger';
 import CommandManager from '../classes/CommandManager';
 import path from 'path';
 import { SHA256 } from './crypto';
-import TempManager from '../classes/TempManager';
 import Command from '../classes/Command';
+import Wumpus from '../structures/wumpus';
 
 export const getCommands = () =>
 	getFiles('./src/commands', ['ts', 'js'], ['node_modules']);
 
-export async function loadCommands(
-	client: Client & { command: CommandManager<any, Locale, any> }
-) {
+export async function loadCommands(client: Wumpus) {
 	const commands = await getCommands();
 
 	if (!commands?.success) return error('Failed to load commands');
@@ -45,7 +42,7 @@ export async function loadCommands(
 }
 
 export async function putCommands(
-	client: Client & { temp: TempManager },
+	client: Wumpus,
 	commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]
 ) {
 	info('Checking for changes in commands');

@@ -1,16 +1,14 @@
-import { Client } from 'discord.js';
 import { getFiles } from './file';
 import MiddlewareManager from '../classes/MiddlewareManager';
 import { error, warn } from './logger';
 import path from 'path';
 import Middleware from '../classes/Middleware';
+import Wumpus from '../structures/wumpus';
 
 export const getMiddlewares = () =>
 	getFiles('./src/middlewares', ['ts', 'js'], ['node_modules']);
 
-export async function loadMiddlewares(
-	client: Client & { middleware: MiddlewareManager }
-) {
+export async function loadMiddlewares(client: Wumpus) {
 	const middlewares = await getMiddlewares();
 
 	if (!middlewares?.success) return error('Failed to load commands');

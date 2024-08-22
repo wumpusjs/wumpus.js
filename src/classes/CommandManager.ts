@@ -1,7 +1,6 @@
 import {
 	ApplicationCommandOptionType,
 	ChatInputCommandInteraction,
-	Client,
 	Locale,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
@@ -11,18 +10,19 @@ import { CommandOption } from '../interfaces/Command';
 import { HashMap } from '../utils/map';
 import { Repository } from 'typeorm';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
+import Wumpus from '../structures/wumpus';
 
 export default class CommandManager<
 	T extends CommandOption[],
 	L extends Locale,
 	R extends EntityClassOrSchema[]
 > {
-	client: Client;
+	client: Wumpus;
 	commands: Map<string, Command<T, L, R>> = new Map();
 	defaultLanguage: Locale;
 	timeouts = new HashMap();
 
-	constructor(client: Client, defaultLanguage: Locale) {
+	constructor(client: Wumpus, defaultLanguage: Locale) {
 		this.client = client;
 		this.defaultLanguage = defaultLanguage;
 	}
@@ -139,12 +139,14 @@ export default class CommandManager<
 					process.exit(1);
 				}
 
-				if (!this.client.repositories.has(token)) {
+				if (!this.client.database.repositories.has(token)) {
 					error('Repository not found');
 					process.exit(1);
 				}
 
-				repositories.push(this.client.repositories.get(token)!);
+				repositories.push(
+					this.client.database.repositories.get(token)!
+				);
 			}
 		}
 

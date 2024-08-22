@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, Locale } from 'discord.js';
+import { Locale } from 'discord.js';
 import Command from '../../classes/Command';
 import User from '../../entity/User';
 import TestButton from '../../buttons/test';

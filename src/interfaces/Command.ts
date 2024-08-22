@@ -15,10 +15,10 @@ import {
 	GuildMember,
 	Channel,
 	Attachment,
+	Client,
 } from 'discord.js';
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
-import { Client } from '../types/discord';
 
 export type OptionTypes =
 	| 'ATTACHMENT'
