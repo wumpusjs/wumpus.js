@@ -42,11 +42,11 @@ class Wumpus implements WumpusStructure {
 	}
 
 	async init() {
-		this.temp.load();
+		await this.temp.load();
 
 		parseENV();
 
-		await new Database(this as any).initialize();
+		await this.database.initialize();
 		await loadMiddlewares(this);
 		await loadCommands(this);
 		await loadEvents(this);
@@ -56,9 +56,22 @@ class Wumpus implements WumpusStructure {
 		await this.buttons.initialize();
 	}
 
+	async start() {
+		await this.instance.login(process.env.TOKEN);
+	}
+
 	repository<T extends keyof RepositoriesMap>(
 		name: T
 	): Repository<RepositoriesMap[T]> {
 		return this.repositories.get(name);
 	}
 }
+
+async function main() {
+	const wumpus = new Wumpus();
+
+	await wumpus.init();
+	await wumpus.start();
+}
+
+main();

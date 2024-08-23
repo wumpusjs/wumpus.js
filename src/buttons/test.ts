@@ -1,6 +1,6 @@
-import { ButtonStyle } from 'discord.js';
 import Button from '../classes/Button';
 import User from '../entity/User';
+import { ButtonStyle } from '../utils/button';
 
 const TestButton = new Button({
 	identifier: 'test',

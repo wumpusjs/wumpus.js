@@ -1,4 +1,4 @@
-import { ButtonStyle, Locale } from 'discord.js';
+import {Locale } from 'discord.js';
 import {
 	ButtonExecutor,
 	ButtonOption,
@@ -7,6 +7,7 @@ import {
 } from '../interfaces/Button';
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
+import { ButtonStyle } from '../utils/button';
 
 export default class Button<
 	T extends ButtonOption[] = ButtonOption[],
