@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
-import { BUTTON_STYLE } from '../utils/button';
+import { ButtonStyle } from '../utils/button';
 
 export type OptionTypes =
 	| 'BOOLEAN'
@@ -79,7 +79,7 @@ export interface ButtonOptions<
 	fields?: Omit<T[number], 'value'>[];
 	defaultLocale?: L;
 	repositories?: R;
-	style?: BUTTON_STYLE;
+	style?: ButtonStyle;
 	emoji?: string;
 	execute: ButtonExecutor<
 		InferOptions<T, L>,
