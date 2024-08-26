@@ -11,10 +11,10 @@ export default class Button {
 	id!: string;
 
 	@Column({
-		type: 'simple-array',
+		type: 'jsonb',
 		nullable: false,
 	})
-	data!: string[];
+	data!: Record<string, any>;
 
 	@Column({
 		type: 'varchar',

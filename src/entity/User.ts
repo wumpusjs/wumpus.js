@@ -11,10 +11,10 @@ export default class User {
 	id!: string;
 
 	@Column({
-		type: 'simple-array',
+		type: 'jsonb',
 		nullable: false,
 	})
-	data!: string[];
+	data!: {}
 
 	@CreateDateColumn()
 	createdAt!: Date;
