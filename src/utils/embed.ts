@@ -1,5 +1,10 @@
-import { EmbedBuilder } from 'discord.js';
-import { EmbedOptions, Field, Footer } from '../interfaces/Embed';
+import { EmbedBuilder, LocaleString } from 'discord.js';
+import {
+	EmbedOptions,
+	Field,
+	Footer,
+	TemplateEmbedOptions,
+} from '../interfaces/Embed';
 
 export enum EmbedType {
 	Success,
@@ -73,5 +78,44 @@ export default class Embed {
 			color: this.color,
 			footer: this.footer,
 		});
+	}
+}
+
+export class EmbedTemplate {
+	title: Partial<Record<LocaleString, string>>;
+	description?: Partial<Record<LocaleString, string>>;
+	fields?: Partial<Record<LocaleString, Field[]>>;
+	color: number;
+	variables?: Record<string, string>;
+
+	constructor(options: TemplateEmbedOptions) {
+		this.title = options.title ?? {};
+		this.description = options.description ?? {};
+		this.fields = options.fields ?? {};
+		this.color =
+			'color' in options ? options.color! : EmbedColors[options.type];
+		this.variables = options.variables ?? {};
+	}
+
+	toEmbed(locale: LocaleString) {
+		const title = this.title[locale] ?? this.title["en-US"];
+		const description = this.description?.[locale] ?? this.description?.["en-US"];
+		const fields = this.fields?.[locale] ?? this.fields?.["en-US"] ?? [];
+
+		const embed = new Embed({ type: this.color });
+		if (title) embed.setTitle(title);
+		if (description) embed.setText(description);
+
+		if (fields) {
+			for (const field of fields) {
+				embed.addField(
+					field.name,
+					field.value,
+					field.inline
+				);
+			}
+		}
+
+		return embed.toEmbed();
 	}
 }

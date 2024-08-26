@@ -1,5 +1,6 @@
 import { Events } from 'discord.js';
 import Middleware from '../classes/Middleware';
+import RegistrationWall from '../templates/registration-wall';
 
 export default new Middleware(
 	Events.InteractionCreate,
@@ -19,9 +20,11 @@ export default new Middleware(
 		});
 
 		if (!user) {
-			return await interaction.reply(
-				'You must be registered to use this command'
-			);
+			return await interaction.reply({
+				embeds: [
+					RegistrationWall.toEmbed(interaction.locale),
+				]
+			});
 		}
 
 		next();
