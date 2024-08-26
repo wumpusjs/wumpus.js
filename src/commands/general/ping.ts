@@ -1,7 +1,6 @@
 import { Locale } from 'discord.js';
 import Command from '../../classes/Command';
 import User from '../../entity/User';
-import TestButton from '../../buttons/test';
 
 export default new Command({
 	name: {

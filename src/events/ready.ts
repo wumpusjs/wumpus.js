@@ -5,7 +5,7 @@ import { success } from '../utils/logger';
 export default new Event({
 	event: Events.ClientReady,
 	once: true,
-	execute: (client) => {
+	execute: ([client]) => {
 		success(`Ready! Logged in as ${client.user.tag}`);
 	},
 });

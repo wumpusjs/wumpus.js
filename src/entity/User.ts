@@ -1,5 +1,7 @@
 import { Entity, CreateDateColumn, PrimaryColumn, Column } from 'typeorm';
 
+export interface UserData {}
+
 @Entity({ name: 'users' })
 export default class User {
 	@PrimaryColumn({
@@ -13,8 +15,9 @@ export default class User {
 	@Column({
 		type: 'jsonb',
 		nullable: false,
+		default: {},
 	})
-	data!: {}
+	data!: UserData;
 
 	@CreateDateColumn()
 	createdAt!: Date;

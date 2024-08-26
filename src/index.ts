@@ -20,7 +20,6 @@ dotenv.config();
 class Wumpus implements WumpusStructure {
 	instance: Client;
 	temp: TempManager;
-	repositories = new Map();
 	middleware: MiddlewareManager;
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
@@ -63,7 +62,7 @@ class Wumpus implements WumpusStructure {
 	repository<T extends keyof RepositoriesMap>(
 		name: T
 	): Repository<RepositoriesMap[T]> {
-		return this.repositories.get(name);
+		return this.database.repositories.get(name)!;
 	}
 }
 

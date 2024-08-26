@@ -29,7 +29,7 @@ export async function loadEvents(client: Wumpus) {
 		client.middleware.addMiddleware(
 			new Middleware(
 				exportedContent.event,
-				(args) => exportedContent.execute(...args),
+				(args) => exportedContent.execute(args, client),
 				!!exportedContent.once
 			)
 		);

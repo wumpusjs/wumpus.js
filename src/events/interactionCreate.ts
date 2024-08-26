@@ -1,50 +1,51 @@
 import { Events } from 'discord.js';
 import Event from '../classes/Event';
+import UncaughtError from '../templates/error';
 
 export default new Event({
 	event: Events.InteractionCreate,
-	execute: async (interaction) => {
+	execute: async ([interaction], client) => {
 		if (interaction.isCommand()) {
 			try {
-				await (
-					interaction?.client as any
-				)?.command?.handleInteraction?.(interaction);
+				await client?.command?.handleInteraction?.(interaction as any);
 			} catch (error) {
 				console.error(error);
-				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({
-						content:
-							'There was an error while executing this command!',
-						ephemeral: true,
-					});
-				} else {
-					await interaction.reply({
-						content:
-							'There was an error while executing this command!',
-						ephemeral: true,
-					});
-				}
+
+				const handler =
+					interaction.replied || interaction.deferred
+						? interaction.followUp
+						: interaction.reply;
+
+				await handler({
+					embeds: [
+						UncaughtError.toEmbed(
+							interaction.user,
+							interaction.locale
+						),
+					],
+					ephemeral: true,
+				});
 			}
 		} else if (interaction.isButton()) {
 			try {
-				await (interaction?.client as any)?.buttons?.handle(
-					interaction
-				);
+				await client?.buttons?.handle(interaction);
 			} catch (error) {
 				console.error(error);
-				if (interaction.replied || interaction.deferred) {
-					await interaction.followUp({
-						content:
-							'There was an error while executing this button!',
-						ephemeral: true,
-					});
-				} else {
-					await interaction.reply({
-						content:
-							'There was an error while executing this button!',
-						ephemeral: true,
-					});
-				}
+
+				const handler =
+					interaction.replied || interaction.deferred
+						? interaction.followUp
+						: interaction.reply;
+
+				await handler({
+					embeds: [
+						UncaughtError.toEmbed(
+							interaction.user,
+							interaction.locale
+						),
+					],
+					ephemeral: true,
+				});
 			}
 		}
 	},

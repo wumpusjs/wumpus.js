@@ -1,4 +1,4 @@
-import { EmbedBuilder, LocaleString } from 'discord.js';
+import { EmbedBuilder, LocaleString, User } from 'discord.js';
 import {
 	EmbedOptions,
 	Field,
@@ -97,10 +97,11 @@ export class EmbedTemplate {
 		this.variables = options.variables ?? {};
 	}
 
-	toEmbed(locale: LocaleString) {
-		const title = this.title[locale] ?? this.title["en-US"];
-		const description = this.description?.[locale] ?? this.description?.["en-US"];
-		const fields = this.fields?.[locale] ?? this.fields?.["en-US"] ?? [];
+	toEmbed(user: User, locale: LocaleString) {
+		const title = this.title[locale] ?? this.title['en-US'];
+		const description =
+			this.description?.[locale] ?? this.description?.['en-US'];
+		const fields = this.fields?.[locale] ?? this.fields?.['en-US'] ?? [];
 
 		const embed = new Embed({ type: this.color });
 		if (title) embed.setTitle(title);
@@ -108,13 +109,14 @@ export class EmbedTemplate {
 
 		if (fields) {
 			for (const field of fields) {
-				embed.addField(
-					field.name,
-					field.value,
-					field.inline
-				);
+				embed.addField(field.name, field.value, field.inline);
 			}
 		}
+
+		embed.setFooter(
+			user.username,
+			user.avatarURL({ size: 64 }) || user.defaultAvatarURL
+		);
 
 		return embed.toEmbed();
 	}
