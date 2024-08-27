@@ -1,9 +1,10 @@
 import { ClientEvents } from 'discord.js';
+import Wumpus from '../structures/wumpus';
 
 interface EventOptions<Event extends keyof ClientEvents> {
 	once?: boolean;
 	event: Event;
-	execute: (...args: ClientEvents[Event]) => void;
+	execute: (args: ClientEvents[Event], client: Wumpus) => void;
 }
 
 export default class Event<Events extends keyof ClientEvents> {

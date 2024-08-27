@@ -10,6 +10,7 @@ import path from 'path';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 import { packet, resolve, validate } from '../utils/data';
 import Wumpus from '../structures/wumpus';
+import UncaughtError from '../templates/error';
 
 export default class ButtonManager {
 	client: Wumpus;
@@ -78,7 +79,7 @@ export default class ButtonManager {
 
 			entity.id = RANDOM_STRING(32);
 			entity.identifier = specified.identifier;
-			entity.data = [];
+			entity.data = {};
 
 			for (const field of specified.fields ?? []) {
 				if (
@@ -88,9 +89,7 @@ export default class ButtonManager {
 					throw new Error(`Invalid field: ${field.name}`);
 				}
 
-				entity.data.push(
-					`${field.name}=${packet[field.type](data[field.name])}`
-				);
+				entity.data[field.name] = packet[field.type](data[field.name]);
 			}
 
 			await buttonRepo.save(entity);
@@ -195,17 +194,18 @@ export default class ButtonManager {
 			await specified.execute(interaction, data, ...repositories);
 		} catch (error) {
 			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({
-					content: 'There was an error while executing this button!',
-					ephemeral: true,
-				});
-			} else {
-				await interaction.reply({
-					content: 'There was an error while executing this button!',
-					ephemeral: true,
-				});
-			}
+
+			const handler =
+				interaction.replied || interaction.deferred
+					? interaction.followUp
+					: interaction.reply;
+
+			await handler({
+				embeds: [
+					UncaughtError.toEmbed(interaction.user, interaction.locale),
+				],
+				ephemeral: true,
+			});
 		}
 	}
 }

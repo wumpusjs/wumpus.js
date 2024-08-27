@@ -49,7 +49,13 @@ export default class Database {
 			const token = getRepositoryToken(entity as any);
 
 			const repository = this.datasource.getRepository(entity);
-			(this.client as any).repositories.set(token, repository);
+
+			if (typeof token !== 'string') {
+				error(`Failed to get repository token for ${file}`);
+				return process.exit(1);
+			}
+
+			this.repositories.set(token, repository);
 		}
 	}
 
