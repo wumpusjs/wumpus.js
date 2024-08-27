@@ -105,7 +105,7 @@ export class EmbedTemplate {
 
 		const replace = (text: string) => {
 			for (const [key, value] of Object.entries(this.variables!)) {
-				text = text.replace(new RegExp(`{${key}}`, 'g'), value);
+				text = text.replace(new RegExp(`{{${key}}}`, 'g'), value);
 			}
 			return text;
 		}
