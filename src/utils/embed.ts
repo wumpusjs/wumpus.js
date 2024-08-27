@@ -97,19 +97,26 @@ export class EmbedTemplate {
 		this.variables = options.variables ?? {};
 	}
 
-	toEmbed(user: User, locale: LocaleString) {
+	toEmbed(user: User, locale: LocaleString, variables?: Record<string, string>) {
 		const title = this.title[locale] ?? this.title['en-US'];
 		const description =
 			this.description?.[locale] ?? this.description?.['en-US'];
 		const fields = this.fields?.[locale] ?? this.fields?.['en-US'] ?? [];
 
+		const replace = (text: string) => {
+			for (const [key, value] of Object.entries(this.variables!)) {
+				text = text.replace(new RegExp(`{${key}}`, 'g'), value);
+			}
+			return text;
+		}
+
 		const embed = new Embed({ type: this.color });
-		if (title) embed.setTitle(title);
-		if (description) embed.setText(description);
+		if (title) embed.setTitle(replace(title));
+		if (description) embed.setText(replace(description));
 
 		if (fields) {
 			for (const field of fields) {
-				embed.addField(field.name, field.value, field.inline);
+				embed.addField(replace(field.name), replace(field.value), field.inline);
 			}
 		}
 
