@@ -104,8 +104,8 @@ export class EmbedTemplate {
 		const fields = this.fields?.[locale] ?? this.fields?.['en-US'] ?? [];
 
 		const replace = (text: string) => {
-			for (const [key, value] of Object.entries(this.variables!)) {
-				text = text.replace(new RegExp(`{${key}}`, 'g'), value);
+			for (const [key, value] of Object.entries(variables ?? {})) {
+				text = text.replace(new RegExp(`{{${key}}}`, 'g'), value);
 			}
 			return text;
 		}

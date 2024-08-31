@@ -106,7 +106,7 @@ export default class Command<
 					this.description.values().next().value!
 			);
 
-		for (const option of this.options as (Omit<CommandOption, 'type'> & {
+		for (const option of (this.options ?? []) as (Omit<CommandOption, 'type'> & {
 			type: OptionTypes;
 		})[]) {
 			const [identifier, data] = Object.entries(option).reduce(
