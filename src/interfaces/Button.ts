@@ -9,6 +9,7 @@ import {
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
 import { ButtonStyle } from '../utils/button';
+import Wumpus from '../structures/wumpus';
 
 export type OptionTypes =
 	| 'BOOLEAN'
@@ -83,7 +84,8 @@ export type ButtonExecutor<
 > = (
 	interaction: ButtonInteraction,
 	options: T,
-	...repositories: R
+	repositories: R,
+	client: Wumpus
 ) => Promise<any>;
 
 export type { OptionTypeMap };

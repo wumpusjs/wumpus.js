@@ -15,7 +15,7 @@ const TestButton = new Button({
 		},
 	] as const,
 	repositories: [User],
-	execute: async (interaction, options, userRepository) => {
+	execute: async (interaction, options, [userRepository]) => {
 		console.log(interaction);
 		console.log(options);
 		console.log(userRepository);

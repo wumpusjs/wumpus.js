@@ -145,9 +145,7 @@ export default class ButtonManager {
 			const promises: Promise<any>[] = [];
 
 			for (const field of specified.fields ?? []) {
-				const value = button.data.find((d) =>
-					d.startsWith(`${field.name}=`)
-				);
+				const value = button.data[field.name];
 
 				if (!value) {
 					continue;
@@ -157,7 +155,7 @@ export default class ButtonManager {
 					Promise.resolve(
 						resolve(interaction.client, interaction.guild?.id)[
 							field.type
-						](value.split('=').slice(1).join('='))
+						](value)
 					).then((value) => {
 						data[field.name] = value!;
 					})
@@ -188,7 +186,12 @@ export default class ButtonManager {
 				}
 			}
 
-			await specified.execute(interaction, data, ...repositories);
+			await specified.execute(
+				interaction,
+				data,
+				repositories,
+				this.client
+			);
 		} catch (error) {
 			console.error(error);
 
