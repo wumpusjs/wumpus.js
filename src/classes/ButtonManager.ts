@@ -140,10 +140,7 @@ export default class ButtonManager {
 				return;
 			}
 
-			const data: InferOptions<
-				Required<typeof specified>['fields'],
-				Locale
-			> = {};
+			const data: InferOptions<Required<typeof specified>['fields']> = {};
 
 			const promises: Promise<any>[] = [];
 
@@ -162,7 +159,7 @@ export default class ButtonManager {
 							field.type
 						](value.split('=').slice(1).join('='))
 					).then((value) => {
-						data[field.name] = value;
+						data[field.name] = value!;
 					})
 				);
 			}

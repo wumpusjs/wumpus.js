@@ -31,58 +31,48 @@ type OptionTypeMap = {
 	USER: User;
 };
 
-type ExtractOptionNames<T extends ButtonOption[], L extends Locale> = {
-	[K in keyof T]: T[K] extends { name: infer N }
-		? L extends keyof N
-			? N[L]
-			: never
-		: never;
-}[number];
+type ExtractOptionNames<T extends ButtonField[]> = T[number]['name'];
 
-export type DynamicRequirmenets<
+export type DynamicRequirements<
 	Required extends Boolean,
 	Type
 > = Required extends true ? Type : Type | undefined;
 
-export type InferOptions<T extends ButtonOption[], L extends Locale> = {
-	[K in ExtractOptionNames<T, L> extends string
-		? ExtractOptionNames<T, L>
-		: never]: DynamicRequirmenets<
-		T extends { name: { [key in L]?: K }; required: true }[] ? true : false,
-		OptionTypeMap[T[number]['type']]
+export type InferOptions<T extends ButtonField[]> = {
+	[K in ExtractOptionNames<T>]: DynamicRequirements<
+		Extract<T[number], { name: K }>['required'] extends true ? true : false,
+		OptionTypeMap[Extract<T[number], { name: K }>['type']]
 	>;
 };
 
-export interface ButtonOption<
+export interface ButtonField<
 	T extends OptionTypes = OptionTypes,
 	R extends boolean = false
 > {
 	type: T;
 	name: string;
-	value: DynamicRequirmenets<R, OptionTypeMap[T]>;
 	required?: R;
 }
-export type SpecificButtonOption<T extends OptionTypes> = Omit<
-	Extract<ButtonOption, { type: T }>,
-	'type' | 'name' | 'description' | 'required'
+
+export type SpecificButtonField<T extends OptionTypes> = Omit<
+	Extract<ButtonField, { type: T }>,
+	'type' | 'name' | 'required'
 > & {
 	[K: string]: any;
 };
 
 export interface ButtonOptions<
-	T extends ButtonOption[],
-	L extends Locale,
+	T extends ButtonField[],
 	R extends EntityClassOrSchema[]
 > {
 	identifier: string;
 	labels: { [key in Locale]?: string };
-	fields?: Omit<T[number], 'value'>[];
-	defaultLocale?: L;
+	fields?: T;
 	repositories?: R;
 	style?: ButtonStyle;
 	emoji?: string;
 	execute: ButtonExecutor<
-		InferOptions<T, L>,
+		InferOptions<T>,
 		Repository<EntityInstanceType<R[number]>>[]
 	>;
 }

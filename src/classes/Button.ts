@@ -1,7 +1,7 @@
-import {Locale } from 'discord.js';
+import { Locale } from 'discord.js';
 import {
 	ButtonExecutor,
-	ButtonOption,
+	ButtonField,
 	ButtonOptions,
 	InferOptions,
 } from '../interfaces/Button';
@@ -10,27 +10,24 @@ import { Repository } from 'typeorm';
 import { ButtonStyle } from '../utils/button';
 
 export default class Button<
-	T extends ButtonOption[] = ButtonOption[],
-	L extends Locale = Locale.EnglishUS,
+	T extends ButtonField[] = ButtonField[],
 	R extends EntityClassOrSchema[] = EntityClassOrSchema[]
 > {
 	identifier: string;
 	labels: { [key in Locale]?: string };
 	fields?: T;
-	defaultLocale: Locale;
 	repositories?: R;
 	execute: ButtonExecutor<
-		InferOptions<T, L>,
+		InferOptions<T>,
 		Repository<EntityInstanceType<R[number]>>[]
 	>;
 	style: ButtonStyle;
 	emoji?: string;
 
-	constructor(options: ButtonOptions<T, L, R>) {
+	constructor(options: ButtonOptions<T, R>) {
 		this.identifier = options.identifier;
 		this.labels = options.labels;
 		if (options.fields) this.fields = options.fields as T;
-		this.defaultLocale = options.defaultLocale || Locale.EnglishUS;
 		this.repositories = (options.repositories || []) as R;
 		this.execute = options.execute;
 		this.style = options.style || ButtonStyle.Primary;

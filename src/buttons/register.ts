@@ -32,7 +32,6 @@ const RegisterButton = new Button({
 
 		await userRepository.insert({
 			id: interaction.user.id,
-			data: {},
 		});
 
 		await interaction.reply({
