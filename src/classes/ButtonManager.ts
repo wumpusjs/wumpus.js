@@ -1,6 +1,6 @@
 import { ButtonBuilder, ButtonInteraction, Locale } from 'discord.js';
 import Button from './Button';
-import { InferOptions } from '../interfaces/Button';
+import { ButtonField, InferOptions } from '../interfaces/Button';
 import { Repository } from 'typeorm';
 import ButtonEntity from '../entity/Button';
 import { RANDOM_STRING } from '../utils/crypto';
@@ -11,6 +11,8 @@ import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 import { packet, resolve, validate } from '../utils/data';
 import Wumpus from '../structures/wumpus';
 import UncaughtError from '../templates/error';
+
+type EnsureString<T> = T extends string ? T : never;
 
 export default class ButtonManager {
 	client: Wumpus;
@@ -35,18 +37,46 @@ export default class ButtonManager {
 		}
 
 		for (const file of files.files) {
-			const button = require(path.join(
-				__dirname,
-				'../buttons',
-				file
-			)).default;
+			const button = require(path.join(__dirname, '../buttons', file));
 
-			if (!(button instanceof Button)) {
-				error(`${file} is not an instance of Button`);
+			const STRUCTURE: string[] = [];
+
+			if (button.MODIFY_EXISTING_STRUCTURE?.length) {
+				for (const identifier of button.MODIFY_EXISTING_STRUCTURE) {
+					if (
+						typeof identifier === 'string' &&
+						(button[identifier] instanceof Button ||
+							button.default?.[identifier] instanceof Button)
+					) {
+						STRUCTURE.push(identifier);
+					}
+				}
+			} else {
+				STRUCTURE.push('default');
+			}
+
+			if (
+				STRUCTURE.some((identifier) => {
+					if (
+						!(button[identifier] instanceof Button) &&
+						!(button.default?.[identifier] instanceof Button)
+					) {
+						error(
+							`${file} (${identifier}) is not an instance of Button`
+						);
+						return true;
+					}
+
+					return false;
+				})
+			) {
 				continue;
 			}
 
-			this.buttons.set(button.identifier, button);
+			for (const identifier of STRUCTURE) {
+				const btn = button?.[identifier] || button.default[identifier];
+				this.buttons.set(btn.identifier, btn);
+			}
 		}
 	}
 
@@ -64,6 +94,7 @@ export default class ButtonManager {
 
 	async create<T extends Button>(
 		specified: T,
+		// TODO: Infer data field types from specified.fields
 		data: Parameters<T['execute']>[1],
 		locale?: Locale
 	) {
@@ -111,6 +142,63 @@ export default class ButtonManager {
 			console.error(e);
 			return null;
 		}
+	}
+
+	async createMany<T extends Button[]>(
+		buttons: {
+			button: T[number];
+			data: Parameters<T[number]['execute']>[1];
+		}[],
+		locale: Locale
+	) {
+		const buttonRepo = this.client.repository('ButtonRepository');
+
+		if (!buttonRepo) {
+			error('Button repository not found');
+			process.exit(1);
+		}
+
+		const entities = new Array<ButtonEntity>();
+
+		for (const { button, data } of buttons) {
+			const entity = new ButtonEntity();
+
+			entity.id = RANDOM_STRING(32);
+			entity.identifier = button.identifier;
+			entity.data = {};
+
+			for (const field of button.fields ?? []) {
+				if (
+					!data[field.name] ||
+					!validate[field.type](data[field.name])
+				) {
+					throw new Error(`Invalid field: ${field.name}`);
+				}
+
+				entity.data[field.name] = packet[field.type](data[field.name]);
+			}
+
+			entities.push(entity);
+		}
+
+		await buttonRepo.save(entities);
+
+		return entities.map((entity, i) => {
+			const specified = buttons[i].button;
+
+			const button = new ButtonBuilder()
+				.setCustomId(entity.id)
+				.setLabel(
+					specified.labels[locale || this.defaultLocale] ||
+						specified.labels[this.defaultLocale] ||
+						'Unnamed Button'
+				)
+				.setStyle(specified.style)
+				.setDisabled(false);
+
+			if (specified.emoji) button.setEmoji(specified.emoji);
+			return button;
+		});
 	}
 
 	async handle(interaction: ButtonInteraction) {
@@ -195,12 +283,14 @@ export default class ButtonManager {
 		} catch (error) {
 			console.error(error);
 
+			if (!interaction) return;
+
 			const handler =
-				interaction.replied || interaction.deferred
+				interaction.replied || interaction?.deferred
 					? interaction.followUp
 					: interaction.reply;
 
-			await handler({
+			await handler?.({
 				embeds: [
 					UncaughtError.toEmbed(interaction.user, interaction.locale),
 				],
