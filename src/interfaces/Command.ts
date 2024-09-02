@@ -19,6 +19,7 @@ import {
 } from 'discord.js';
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
+import PERMISSION from '../constants/permission';
 
 export type OptionTypes =
 	| 'ATTACHMENT'
@@ -140,6 +141,7 @@ interface CommandOptions<
 		InferOptions<T, L>,
 		Repository<EntityInstanceType<R[number]>>[]
 	>;
+	permission?: PERMISSION;
 }
 
 type CommandExecutor<

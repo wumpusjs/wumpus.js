@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { Client, GatewayIntentBits, Locale } from 'discord.js';
+import { Client, GatewayIntentBits, Locale, Team } from 'discord.js';
 import dotenv from 'dotenv';
 import { loadCommands, putCommands } from './utils/command';
 import { loadEvents } from './utils/event';
@@ -14,6 +14,7 @@ import WumpusStructure from './structures/wumpus';
 import { Repository } from 'typeorm';
 import { RepositoriesMap } from './interfaces/repositories';
 import CommandManager from './classes/CommandManager';
+import { warn } from './utils/logger';
 
 dotenv.config();
 
@@ -24,6 +25,7 @@ class Wumpus implements WumpusStructure {
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
 	database: Database;
+	superusers: string[] = [];
 
 	constructor() {
 		this.instance = new Client({
@@ -57,6 +59,25 @@ class Wumpus implements WumpusStructure {
 
 	async start() {
 		await this.instance.login(process.env.TOKEN);
+
+		await this.getOwner();
+	}
+
+	async getOwner() {
+		await this.instance.application?.fetch();
+
+		if (!this.instance.application?.owner) return warn('No owner found');
+
+		if (this.instance.application.owner instanceof Team) {
+			const team = this.instance.application.owner;
+			if (team.owner) this.superusers.push(team.owner.id);
+
+			team.members.each((member) => {
+				this.superusers.push(member.id);
+			});
+		} else {
+			this.superusers.push(this.instance.application.owner.id);
+		}
 	}
 
 	repository<T extends keyof RepositoriesMap>(

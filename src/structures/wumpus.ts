@@ -17,4 +17,5 @@ export default interface Wumpus {
 	middleware: MiddlewareManager;
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
+	superusers: string[];
 }

@@ -25,6 +25,7 @@ import {
 import { error } from '../utils/logger';
 import { Repository } from 'typeorm';
 import { EntityClassOrSchema } from '../utils/typeorm';
+import PERMISSION from '../constants/permission';
 
 export default class Command<
 	T extends CommandOption[],
@@ -38,6 +39,7 @@ export default class Command<
 	options: InferOptions<T, L>;
 	timeout = -1;
 	repositories?: R;
+	permission?: PERMISSION;
 
 	constructor(options: CommandOptions<T, L, R>) {
 		if (options.name) {
@@ -61,6 +63,10 @@ export default class Command<
 
 		if (options.repositories) {
 			this.repositories = options.repositories;
+		}
+
+		if (options.permission) {
+			this.permission = options.permission;
 		}
 	}
 
@@ -106,7 +112,10 @@ export default class Command<
 					this.description.values().next().value!
 			);
 
-		for (const option of (this.options ?? []) as (Omit<CommandOption, 'type'> & {
+		for (const option of (this.options ?? []) as (Omit<
+			CommandOption,
+			'type'
+		> & {
 			type: OptionTypes;
 		})[]) {
 			const [identifier, data] = Object.entries(option).reduce(
