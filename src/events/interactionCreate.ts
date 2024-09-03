@@ -9,8 +9,6 @@ export default new Event({
 			try {
 				await client?.command?.handleInteraction?.(interaction as any);
 			} catch (error) {
-				console.error(error);
-
 				const handler =
 					interaction.replied || interaction.deferred
 						? interaction.followUp
@@ -30,8 +28,6 @@ export default new Event({
 			try {
 				await client?.buttons?.handle(interaction);
 			} catch (error) {
-				console.error(error);
-
 				const handler =
 					interaction.replied || interaction.deferred
 						? interaction.followUp

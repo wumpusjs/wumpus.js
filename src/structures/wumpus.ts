@@ -6,6 +6,7 @@ import { Client } from 'discord.js';
 import CommandManager from '../classes/CommandManager';
 import ButtonManager from '../classes/ButtonManager';
 import Database from '../classes/Database';
+import { Logger } from 'pino';
 
 export default interface Wumpus {
 	instance: Client;
@@ -18,4 +19,6 @@ export default interface Wumpus {
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
 	superusers: string[];
+
+	logger: Logger;
 }

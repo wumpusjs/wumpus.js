@@ -4,4 +4,4 @@ export enum ButtonStyle {
 	Success = 3,
 	Danger = 4,
 	Link = 5,
-};
+}

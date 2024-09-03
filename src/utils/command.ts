@@ -5,7 +5,6 @@ import {
 	Routes,
 } from 'discord.js';
 import { getFiles } from './file';
-import { error, info, success, warn } from './logger';
 import CommandManager from '../classes/CommandManager';
 import path from 'path';
 import { SHA256 } from './crypto';
@@ -18,9 +17,10 @@ export const getCommands = () =>
 export async function loadCommands(client: Wumpus) {
 	const commands = await getCommands();
 
-	if (!commands?.success) return error('Failed to load commands');
+	if (!commands?.success)
+		return client.logger.error('Failed to load commands');
 
-	if (!commands.files.length) return warn('No commands found');
+	if (!commands.files.length) return client.logger.warn('No commands found');
 
 	if (!client.command)
 		client.command = new CommandManager(client, Locale.EnglishUS);
@@ -33,7 +33,7 @@ export async function loadCommands(client: Wumpus) {
 		));
 
 		if (!(exportedContent instanceof Command))
-			return error(
+			return client.logger.error(
 				`Failed to load command ${command}, it does not export a Command instance`
 			);
 
@@ -45,11 +45,13 @@ export async function putCommands(
 	client: Wumpus,
 	commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]
 ) {
-	info('Checking for changes in commands');
+	client.logger.info('Checking for changes in commands');
 	if (client.temp) {
 		let hash = SHA256(JSON.stringify(commands));
 		if (hash === client.temp.get('command-hash')) {
-			return info('No changes in commands, skipping reload');
+			return client.logger.info(
+				'No changes in commands, skipping reload'
+			);
 		} else {
 			client.temp.set('command-hash', hash, true);
 		}
@@ -58,14 +60,16 @@ export async function putCommands(
 	const rest = new REST().setToken(process.env.TOKEN!);
 
 	try {
-		info(`Started refreshing ${commands.length} application (/) commands.`);
+		client.logger.info(
+			`Started refreshing ${commands.length} application (/) commands.`
+		);
 
 		const data = (await rest.put(
 			Routes.applicationCommands(process.env.APPLICATION_ID!),
 			{ body: commands }
 		)) as any;
 
-		success(
+		client.logger.info(
 			`Successfully reloaded ${data?.length} application (/) commands.`
 		);
 	} catch (error) {

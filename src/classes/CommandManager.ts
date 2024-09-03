@@ -4,7 +4,6 @@ import {
 	Locale,
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
-import { error } from '../utils/logger';
 import Command from './Command';
 import { CommandOption } from '../interfaces/Command';
 import { HashMap } from '../utils/map';
@@ -29,7 +28,7 @@ export default class CommandManager<
 
 	addCommand(exportedContent: Command<T, L, R>): this {
 		if (!(exportedContent instanceof Command)) {
-			error('Command is not an instance of Command');
+			this.client.logger.error('Command is not an instance of Command');
 			return this;
 		}
 
@@ -38,7 +37,7 @@ export default class CommandManager<
 			exportedContent.name.values().next().value;
 
 		if (!name) {
-			error('Command name is missing');
+			this.client.logger.error('Command name is missing');
 			return this;
 		}
 
@@ -135,12 +134,12 @@ export default class CommandManager<
 				const token = getRepositoryToken(repository as any);
 
 				if (typeof token !== 'string') {
-					error('Invalid repository token');
+					globalThis.logger.error('Invalid repository token');
 					process.exit(1);
 				}
 
 				if (!this.client.database.repositories.has(token)) {
-					error('Repository not found');
+					this.client.logger.error('Repository not found');
 					process.exit(1);
 				}
 

@@ -22,7 +22,6 @@ import {
 	OptionTypes,
 	SpecificCommandOption,
 } from '../interfaces/Command';
-import { error } from '../utils/logger';
 import { Repository } from 'typeorm';
 import { EntityClassOrSchema } from '../utils/typeorm';
 import PERMISSION from '../constants/permission';
@@ -224,7 +223,7 @@ export default class Command<
 					);
 					break;
 				default:
-					error(`Invalid option type: ${option.type}`);
+					global.logger.error(`Invalid option type: ${option.type}`);
 					process.exit(1);
 			}
 		}
@@ -255,7 +254,7 @@ export default class Command<
 		)?.[type]?.();
 
 		if (!option) {
-			error(`Invalid option type: ${type}`);
+			global.logger.error(`Invalid option type: ${type}`);
 			process.exit(1);
 		}
 

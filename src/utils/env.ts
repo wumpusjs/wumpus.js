@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { error } from './logger';
+import Wumpus from '../structures/wumpus';
 
 export const env = z.object({
 	APPLICATION_ID: z.string().regex(/^[0-9]+$/),
 	TOKEN: z
 		.string()
-		.regex(/^[a-zA-Z0-9\-\_]+\.[a-zA-Z0-9\-\_]+\.[a-zA-Z0-9\-\_]+$/),
+		.regex(/^[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+$/),
 	DATABASE_HOST: z.string(),
 	DATABASE_PORT: z
 		.string()
@@ -17,11 +17,14 @@ export const env = z.object({
 	ENVIRONMENT: z.enum(['development', 'production']),
 });
 
-export function parseENV() {
+export function parseENV(client: Wumpus) {
 	const parsed = env.safeParse(process.env);
 
 	if (!parsed.success) {
-		error('Failed to parse environment variables', parsed.error.toString());
+		client.logger.fatal(
+			'Failed to parse environment variables',
+			parsed.error.toString()
+		);
 		process.exit(1);
 	}
 }

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getFiles } from '../utils/file';
-import { error, info, warn } from '../utils/logger';
+import Wumpus from '../structures/wumpus';
 
 interface ITempOptions {
 	dir: string;
@@ -12,8 +12,10 @@ interface ITempOptions {
 
 export default class TempManager {
 	options: ITempOptions;
+	client: Wumpus;
 
-	constructor(options?: ITempOptions) {
+	constructor(client: Wumpus, options?: ITempOptions) {
+		this.client = client;
 		this.options = {
 			dir: options?.dir || path.join(process.cwd(), '.temp'),
 			values: options?.values || {},
@@ -57,7 +59,7 @@ export default class TempManager {
 					json === null ||
 					!Array.isArray(json)
 				) {
-					error(
+					this.client.logger.fatal(
 						`Invalid temp file: ${file}! Possible corruption, please check/delete the file!`
 					);
 					process.exit(1);
@@ -67,11 +69,11 @@ export default class TempManager {
 					this.options.values?.[this.hashKey(key)]?.set(key, value);
 				}
 			} catch (_) {
-				warn(`Failed to load temp file: ${file}`);
+				this.client.logger.warn(`Failed to load temp file: ${file}`);
 			}
 		}
 
-		info('Temp files loaded successfully!');
+		this.client.logger.info('Temp files loaded successfully!');
 
 		return true;
 	}
@@ -94,7 +96,7 @@ export default class TempManager {
 				fs.writeFileSync(filePath, data);
 			}
 		} catch (error) {
-			warn(`Failed to save temp file: ${key}`);
+			this.client.logger.warn(`Failed to save temp file: ${key}`);
 			return false;
 		}
 

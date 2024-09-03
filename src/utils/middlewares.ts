@@ -1,6 +1,5 @@
 import { getFiles } from './file';
 import MiddlewareManager from '../classes/MiddlewareManager';
-import { error, warn } from './logger';
 import path from 'path';
 import Middleware from '../classes/Middleware';
 import Wumpus from '../structures/wumpus';
@@ -11,9 +10,11 @@ export const getMiddlewares = () =>
 export async function loadMiddlewares(client: Wumpus) {
 	const middlewares = await getMiddlewares();
 
-	if (!middlewares?.success) return error('Failed to load commands');
+	if (!middlewares?.success)
+		return client.logger.error('Failed to load middlewares');
 
-	if (!middlewares.files.length) return warn('No commands found');
+	if (!middlewares.files.length)
+		return client.logger.warn('No commands found');
 
 	if (!client.middleware) client.middleware = new MiddlewareManager(client);
 
@@ -25,7 +26,7 @@ export async function loadMiddlewares(client: Wumpus) {
 		));
 
 		if (!(exportedContent instanceof Middleware))
-			return error(
+			return client.logger.error(
 				`Failed to load middleware ${middleware}, it does not export a Middleware instance`
 			);
 

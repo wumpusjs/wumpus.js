@@ -1,6 +1,5 @@
 import { DataSource, Repository } from 'typeorm';
 import path, { sep } from 'path';
-import { error } from '../utils/logger';
 import { getRepositoryToken } from '../utils/typeorm';
 import { getFiles } from '../utils/file';
 import Wumpus from '../structures/wumpus';
@@ -29,7 +28,7 @@ export default class Database {
 
 	async initialize() {
 		await this.datasource.initialize().catch(() => {
-			error('Failed to connect to database');
+			global.logger('Failed to connect to database');
 			process.exit(1);
 		});
 
@@ -51,7 +50,9 @@ export default class Database {
 			const repository = this.datasource.getRepository(entity);
 
 			if (typeof token !== 'string') {
-				error(`Failed to get repository token for ${file}`);
+				this.client.logger.error(
+					`Failed to get repository token for ${file}`
+				);
 				return process.exit(1);
 			}
 

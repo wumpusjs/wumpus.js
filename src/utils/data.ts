@@ -27,14 +27,14 @@ export const resolve = (client?: Client, guildId?: string) => ({
 });
 
 export const validate = {
-	STRING: (field: string) => typeof field === 'string',
-	BOOLEAN: (field: boolean) => !!field === field,
-	CHANNEL: (field: BaseChannel) => field instanceof BaseChannel,
+	STRING: (field: unknown) => typeof field === 'string',
+	BOOLEAN: (field: unknown) => !!field === field,
+	CHANNEL: (field: unknown) => field instanceof BaseChannel,
 	INTEGER: (field: number) => !isNaN(field) && field % 1 === 0,
 	NUMBER: (field: number) => !isNaN(field),
-	ROLE: (field: Role) => field instanceof Role,
-	USER: (field: User) => field instanceof User,
-	MEMBER: (field: GuildMember) => field instanceof GuildMember,
+	ROLE: (field: unknown) => field instanceof Role,
+	USER: (field: unknown) => field instanceof User,
+	MEMBER: (field: unknown) => field instanceof GuildMember,
 } as {
 	[key: string]: (field: any) => boolean;
 };

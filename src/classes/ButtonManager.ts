@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import ButtonEntity from '../entity/Button';
 import { RANDOM_STRING } from '../utils/crypto';
 import { getFiles } from '../utils/file';
-import { error } from '../utils/logger';
 import path from 'path';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 import { packet, resolve, validate } from '../utils/data';
@@ -32,7 +31,7 @@ export default class ButtonManager {
 		);
 
 		if (!files.success) {
-			error('Failed to load buttons');
+			this.client.logger.fatal('Failed to load buttons');
 			process.exit(1);
 		}
 
@@ -61,7 +60,7 @@ export default class ButtonManager {
 						!(button[identifier] instanceof Button) &&
 						!(button.default?.[identifier] instanceof Button)
 					) {
-						error(
+						this.client.logger.error(
 							`${file} (${identifier}) is not an instance of Button`
 						);
 						return true;
@@ -102,7 +101,7 @@ export default class ButtonManager {
 			const buttonRepo = this.client.repository('ButtonRepository');
 
 			if (!buttonRepo) {
-				error('Button repository not found');
+				this.client.logger.fatal('Button repository not found');
 				process.exit(1);
 			}
 
@@ -139,7 +138,6 @@ export default class ButtonManager {
 
 			return button;
 		} catch (e) {
-			console.error(e);
 			return null;
 		}
 	}
@@ -154,7 +152,7 @@ export default class ButtonManager {
 		const buttonRepo = this.client.repository('ButtonRepository');
 
 		if (!buttonRepo) {
-			error('Button repository not found');
+			this.client.logger.fatal('Button repository not found');
 			process.exit(1);
 		}
 
@@ -206,7 +204,7 @@ export default class ButtonManager {
 			const buttonRepo = this.client.repository('ButtonRepository');
 
 			if (!buttonRepo) {
-				error('Button repository not found');
+				this.client.logger.fatal('Button repository not found');
 				process.exit(1);
 			}
 
@@ -259,12 +257,12 @@ export default class ButtonManager {
 					const token = getRepositoryToken(repository as any);
 
 					if (typeof token !== 'string') {
-						error('Invalid repository token');
+						this.client.logger.error('Invalid repository token');
 						process.exit(1);
 					}
 
 					if (!this.client.database.repositories.has(token)) {
-						error('Repository not found');
+						this.client.logger.error('Repository not found');
 						process.exit(1);
 					}
 
