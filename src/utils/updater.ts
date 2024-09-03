@@ -13,20 +13,26 @@ async function getVersion(
 	client: Wumpus
 ): Promise<string | null> {
 	try {
-		const data =
-			source === 'local'
-				? await fs.readFile(PACKAGE_JSON_PATH, 'utf-8')
-				: (await axios.get(REMOTE_PACKAGE_JSON_URL)).data;
-
-		const version = JSON.parse(data)?.version;
-
-		if (!semver.valid(version)) {
+		let version: string;
+		
+		if (
+			semver.valid(
+				(version = (
+					source === 'local'
+						? JSON.parse(
+								await fs.readFile(PACKAGE_JSON_PATH, 'utf-8')
+						  )
+						: (await axios.get(REMOTE_PACKAGE_JSON_URL))?.data
+				)?.version)
+			) === null
+		) {
 			client.logger.fatal(`Invalid version in ${source} package.json`);
 			return null;
 		}
 
 		return version;
 	} catch (e) {
+		console.error(e);
 		client.logger.fatal(
 			`Failed to ${
 				source === 'local' ? 'read' : 'fetch'
