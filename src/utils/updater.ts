@@ -14,7 +14,7 @@ async function getVersion(
 ): Promise<string | null> {
 	try {
 		let version: string;
-		
+
 		if (
 			semver.valid(
 				(version = (
@@ -89,6 +89,20 @@ export async function checkForUpdate(client: Wumpus): Promise<void> {
 
 	if (!localVersion || !remoteVersion) {
 		client.logger.fatal('Failed to check for updates');
+		process.exit(1);
+	}
+
+	if (semver.lt(localVersion, '1.0.0')) {
+		client.logger.warn(
+			'This version is for initial development. Use with caution. And the current features may not be stable or can be removed/changed in the future.'
+		);
+		process.exit(1);
+	}
+
+	if (semver.gt(localVersion, remoteVersion)) {
+		client.logger.fatal(
+			`Local version (${localVersion}) is greater than remote version (${remoteVersion})`
+		);
 		process.exit(1);
 	}
 
