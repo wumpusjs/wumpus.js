@@ -7,9 +7,10 @@ import { RANDOM_STRING } from '../utils/crypto';
 import { getFiles } from '../utils/file';
 import path from 'path';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
-import { packet, resolve, validate } from '../utils/data';
+import { identifyPacket, packet, resolve, validate } from '../utils/data';
 import Wumpus from '../structures/wumpus';
 import UncaughtError from '../templates/error';
+import UnauthorizedInteraction from '../templates/error/unauthorized-interaction';
 
 type EnsureString<T> = T extends string ? T : never;
 
@@ -142,13 +143,19 @@ export default class ButtonManager {
 		}
 	}
 
-	async createMany<T extends Button[]>(
+	async createMany<T extends Button[], C extends boolean>(
 		buttons: {
 			button: T[number];
 			data: Parameters<T[number]['execute']>[1];
 		}[],
-		locale: Locale
-	) {
+		locale: Locale,
+		getCustomId: C = false as C,
+		forceData: boolean = false
+	): Promise<
+		C extends true
+			? { button: ButtonBuilder; id: string }[]
+			: ButtonBuilder[]
+	> {
 		const buttonRepo = this.client.repository('ButtonRepository');
 
 		if (!buttonRepo) {
@@ -165,15 +172,27 @@ export default class ButtonManager {
 			entity.identifier = button.identifier;
 			entity.data = {};
 
-			for (const field of button.fields ?? []) {
-				if (
-					!data[field.name] ||
-					!validate[field.type](data[field.name])
-				) {
-					throw new Error(`Invalid field: ${field.name}`);
-				}
+			if (!forceData) {
+				for (const field of button.fields ?? []) {
+					if (
+						!data[field.name] ||
+						!validate[field.type](data[field.name])
+					) {
+						throw new Error(`Invalid field: ${field.name}`);
+					}
 
-				entity.data[field.name] = packet[field.type](data[field.name]);
+					entity.data[field.name] = packet[field.type](
+						data[field.name]
+					);
+				}
+			} else {
+				for (const [key, value] of Object.entries(data)) {
+					if (!value || !validate?.[identifyPacket(value)]?.(value)) {
+						throw new Error(`Invalid field: ${key}`);
+					}
+
+					entity.data[key] = packet[identifyPacket(value)](value);
+				}
 			}
 
 			entities.push(entity);
@@ -195,8 +214,12 @@ export default class ButtonManager {
 				.setDisabled(false);
 
 			if (specified.emoji) button.setEmoji(specified.emoji);
+
+			if (getCustomId) return { button, id: entity.id };
 			return button;
-		});
+		}) as C extends true
+			? { button: ButtonBuilder; id: string }[]
+			: ButtonBuilder[];
 	}
 
 	async handle(interaction: ButtonInteraction) {
@@ -218,6 +241,47 @@ export default class ButtonManager {
 
 			if (!button) {
 				return;
+			}
+
+			if (button.data.state) {
+				const stateRepo = this.client.repository('StateRepository');
+
+				if (!stateRepo) {
+					this.client.logger.fatal('State repository not found');
+					process.exit(1);
+				}
+
+				const state = await stateRepo.findOne({
+					where: {
+						id: button.data.state,
+					},
+				});
+
+				if (!state) {
+					return;
+				}
+
+				if (
+					state.state.user &&
+					state.state.user !== interaction.user.id
+				) {
+					return await interaction.reply({
+						embeds: [
+							UnauthorizedInteraction.toEmbed(
+								interaction.user,
+								interaction.locale
+							),
+						],
+						ephemeral: true,
+					});
+				}
+
+				return await this.client.stator.handle(
+					state.identifier,
+					interaction,
+					state,
+					button.identifier
+				);
 			}
 
 			const specified = this.get(button.identifier);

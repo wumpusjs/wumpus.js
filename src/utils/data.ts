@@ -38,3 +38,7 @@ export const validate = {
 } as {
 	[key: string]: (field: any) => boolean;
 };
+
+export const identifyPacket = (packet: any): string => {
+	return Object.keys(validate).find((key) => validate?.[key]?.(packet))!;
+};

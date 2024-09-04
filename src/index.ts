@@ -17,6 +17,7 @@ import CommandManager from './classes/CommandManager';
 import { checkForUpdate } from './utils/updater';
 import pino from 'pino';
 import pretty from 'pino-pretty';
+import Stator from './classes/Stator';
 
 dotenv.config();
 
@@ -28,15 +29,19 @@ class Wumpus implements WumpusStructure {
 	buttons: ButtonManager;
 	database: Database;
 	superusers: string[] = [];
-	logger = pino({}, pretty({
-		colorize: true,
-		crlf: false,
-		translateTime: 'HH:MM:ss',
-		ignore: 'pid,hostname',
-		hideObject: true,
-		levelFirst: true,
-		messageFormat: '{msg}',
-	}));
+	logger = pino(
+		{},
+		pretty({
+			colorize: true,
+			crlf: false,
+			translateTime: 'HH:MM:ss',
+			ignore: 'pid,hostname',
+			hideObject: true,
+			levelFirst: true,
+			messageFormat: '{msg}',
+		})
+	);
+	stator: Stator;
 
 	constructor() {
 		this.instance = new Client({
@@ -51,13 +56,14 @@ class Wumpus implements WumpusStructure {
 		this.middleware = new MiddlewareManager(this);
 		this.buttons = new ButtonManager(this, Locale.EnglishUS);
 		this.command = new CommandManager(this, Locale.EnglishUS);
+		this.stator = new Stator(this);
 
 		global.logger = this.logger;
 	}
 
 	async init() {
 		await checkForUpdate(this);
-		
+
 		await this.temp.load();
 
 		parseENV(this);
@@ -81,7 +87,8 @@ class Wumpus implements WumpusStructure {
 	async getOwner() {
 		await this.instance.application?.fetch();
 
-		if (!this.instance.application?.owner) return this.logger.warn('No owner found');
+		if (!this.instance.application?.owner)
+			return this.logger.warn('No owner found');
 
 		if (this.instance.application.owner instanceof Team) {
 			const team = this.instance.application.owner;

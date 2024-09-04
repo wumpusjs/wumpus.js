@@ -96,7 +96,6 @@ export async function checkForUpdate(client: Wumpus): Promise<void> {
 		client.logger.warn(
 			'This version is for initial development. Use with caution. And the current features may not be stable or can be removed/changed in the future.'
 		);
-		process.exit(1);
 	}
 
 	if (semver.gt(localVersion, remoteVersion)) {

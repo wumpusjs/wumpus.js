@@ -97,7 +97,15 @@ export class EmbedTemplate {
 		this.variables = options.variables ?? {};
 	}
 
-	toEmbed(user: User, locale: LocaleString, variables?: Record<string, string>) {
+	toEmbed(
+		user: {
+			username: string;
+			defaultAvatarURL: string;
+			avatarURL: (options: { size: 16 | 32 | 64 | 128 }) => string | null;
+		},
+		locale: LocaleString,
+		variables?: Record<string, string>
+	) {
 		const title = this.title[locale] ?? this.title['en-US'];
 		const description =
 			this.description?.[locale] ?? this.description?.['en-US'];
@@ -108,7 +116,7 @@ export class EmbedTemplate {
 				text = text.replace(new RegExp(`{{${key}}}`, 'g'), value);
 			}
 			return text;
-		}
+		};
 
 		const embed = new Embed({ type: this.color });
 		if (title) embed.setTitle(replace(title));
@@ -116,7 +124,11 @@ export class EmbedTemplate {
 
 		if (fields) {
 			for (const field of fields) {
-				embed.addField(replace(field.name), replace(field.value), field.inline);
+				embed.addField(
+					replace(field.name),
+					replace(field.value),
+					field.inline
+				);
 			}
 		}
 

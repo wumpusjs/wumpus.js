@@ -20,6 +20,7 @@ import {
 import { EntityClassOrSchema, EntityInstanceType } from '../utils/typeorm';
 import { Repository } from 'typeorm';
 import PERMISSION from '../constants/permission';
+import Wumpus from '../structures/wumpus';
 
 export type OptionTypes =
 	| 'ATTACHMENT'
@@ -152,7 +153,9 @@ type CommandExecutor<
 		client: Client;
 	},
 	options: T,
-	...repositories: R
+	injected: [...R, Wumpus] & {
+		at(index: -1): Wumpus;
+	}
 ) => Promise<any>;
 
 export type {
