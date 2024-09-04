@@ -12,7 +12,7 @@ const RegisterButton = new Button({
 	},
 	style: ButtonStyle.Success,
 	repositories: [User],
-	execute: async (interaction, options, [userRepository]) => {
+	execute: async (interaction, options, client, userRepository) => {
 		const user = await userRepository.findOne({
 			where: { id: interaction.user.id },
 		});

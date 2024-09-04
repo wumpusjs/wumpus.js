@@ -339,8 +339,8 @@ export default class ButtonManager {
 			await specified.execute(
 				interaction,
 				data,
-				repositories,
-				this.client
+				this.client,
+				...repositories
 			);
 		} catch (error) {
 			console.error(error);

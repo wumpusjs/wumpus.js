@@ -152,7 +152,8 @@ export default class CommandManager<
 		await command.execute(
 			interaction,
 			options as any,
-			[...repositories, this.client] as any
+			this.client,
+			...repositories
 		);
 	}
 

@@ -1,6 +1,6 @@
 {
 	"name": "wumpus-client",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"dependencies": {
 		"axios": "^1.7.7",
 		"chalk": "4.1.2",

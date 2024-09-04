@@ -93,7 +93,7 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 
 		if (!button) return;
 
-		await button.execute(interaction, {}, [], client);
+		await button.execute(interaction, {}, client);
 
 		if (interaction.message instanceof Message) {
 			await interaction.deferUpdate();

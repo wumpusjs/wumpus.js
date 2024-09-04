@@ -153,9 +153,8 @@ type CommandExecutor<
 		client: Client;
 	},
 	options: T,
-	injected: [...R, Wumpus] & {
-		at(index: -1): Wumpus;
-	}
+	client: Wumpus,
+	...repositories: R
 ) => Promise<any>;
 
 export type {

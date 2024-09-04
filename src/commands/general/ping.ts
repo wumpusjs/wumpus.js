@@ -29,7 +29,7 @@ export default new Command({
 		},
 	] as const,
 	repositories: [User] as const,
-	execute: async (interaction, options, injected) => {
+	execute: async (interaction, options, client, userRepository) => {
 		new ReactiveEmbed({
 			identifier: 'test-counter',
 			buttons: (state) => [
@@ -68,7 +68,7 @@ export default new Command({
 			initialState: {
 				count: 0,
 			},
-		}).send(injected.at(-1), interaction);
+		}).send(client, interaction);
 	},
 	defaultLocale: Locale.EnglishUS,
 });

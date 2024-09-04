@@ -84,8 +84,8 @@ export type ButtonExecutor<
 > = (
 	interaction: ButtonInteraction,
 	options: T,
-	repositories: R,
-	client: Wumpus
+	client: Wumpus,
+	...repositories: R
 ) => Promise<any>;
 
 export type { OptionTypeMap };
