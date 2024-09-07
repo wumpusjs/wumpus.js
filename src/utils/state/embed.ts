@@ -24,7 +24,10 @@ interface ReactiveEmbedOptions<T extends Record<string, any>> {
 	// Embed template to render
 	embedTemplate: EmbedTemplate;
 	// Buttons to render based on the current state
-	buttons: (state: DeepReactive<T>) => Button[];
+	buttons: (
+		state: DeepReactive<T>,
+		manager: ReactiveState<DeepReactive<T>>
+	) => Button[];
 	handleStateUpdate?: (newState: DeepReactive<T>) => void;
 }
 
@@ -32,7 +35,10 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 	identifier: string;
 	private state: ReactiveState<DeepReactive<T>>;
 	private embedTemplate: EmbedTemplate;
-	private buttons: (state: DeepReactive<T>) => Button[];
+	private buttons: (
+		state: DeepReactive<T>,
+		reactive: ReactiveState<DeepReactive<T>>
+	) => Button[];
 	private handleStateUpdate?: (newState: any) => void;
 
 	private _button_ids: string[] = [];
@@ -66,7 +72,7 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 		format: T = false as T
 	): T extends true ? ActionRowBuilder[] : ButtonBuilder[] {
 		return format
-			? (this.buttons(this.state.state as any).reduce(
+			? (this.buttons(this.state.state as any, this.state).reduce(
 					(acc, button, i) => {
 						acc[i % 3] = (
 							acc[i % 3] || new ActionRowBuilder()
@@ -76,7 +82,7 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 					},
 					[] as ActionRowBuilder[]
 			  ) as any)
-			: this.buttons(this.state.state as any);
+			: this.buttons(this.state.state as any, this.state);
 	}
 
 	async handle(
@@ -87,7 +93,7 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 	) {
 		this.state.updateState(state.state as any);
 
-		const button = this.buttons(this.state.state as any).find(
+		const button = this.buttons(this.state.state as any, this.state).find(
 			(b) => b.identifier === buttonIdentifier
 		);
 
@@ -128,7 +134,7 @@ export default class ReactiveEmbed<T extends Record<string, any>> {
 			});
 		}
 
-		const buttons = this.buttons(this.state.state as any);
+		const buttons = this.buttons(this.state.state as any, this.state);
 
 		const result = await client.buttons.createMany(
 			buttons.map((button) => ({

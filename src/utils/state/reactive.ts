@@ -70,4 +70,14 @@ export class ReactiveState<T extends Record<string, any>> {
 		this._state;
 		this.globalHandler(newState);
 	}
+
+	partial(partialState: Partial<DeepReactive<T>>, notify = true) {
+		Object.keys(partialState).forEach((key) => {
+			if (this._state.hasOwnProperty(key)) {
+				(this._state as any)[key] = partialState[key];
+				if (notify) this.notifyUpdate(key, partialState[key]);
+			}
+		});
+		this.globalHandler(this._state);
+	}
 }
