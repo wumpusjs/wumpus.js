@@ -1,11 +1,11 @@
-import { getFiles } from './file';
+import { getFiles, getPath } from './file';
 import MiddlewareManager from '../classes/MiddlewareManager';
 import path from 'path';
 import Middleware from '../classes/Middleware';
 import Wumpus from '../structures/wumpus';
 
 export const getMiddlewares = () =>
-	getFiles('./src/middlewares', ['ts', 'js'], ['node_modules']);
+	getFiles('./middlewares', ['ts', 'js'], ['node_modules']);
 
 export async function loadMiddlewares(client: Wumpus) {
 	const middlewares = await getMiddlewares();
@@ -14,15 +14,13 @@ export async function loadMiddlewares(client: Wumpus) {
 		return client.logger.error('Failed to load middlewares');
 
 	if (!middlewares.files.length)
-		return client.logger.warn('No commands found');
+		return client.logger.warn('No middlewares found');
 
 	if (!client.middleware) client.middleware = new MiddlewareManager(client);
 
 	middlewares.files.forEach((middleware) => {
-		const { default: exportedContent } = require(path.join(
-			process.cwd(),
-			'src/middlewares',
-			middleware
+		const { default: exportedContent } = require(getPath(
+			`./middlewares/${middleware}`
 		));
 
 		if (!(exportedContent instanceof Middleware))

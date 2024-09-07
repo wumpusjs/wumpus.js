@@ -1,24 +1,22 @@
-import { getFiles } from './file';
+import { getFiles, getPath } from './file';
 import path from 'path';
 import Event from '../classes/Event';
 import Middleware from '../classes/Middleware';
 import Wumpus from '../structures/wumpus';
 
 export const getEvents = () =>
-	getFiles('./src/events', ['ts', 'js'], ['node_modules'], false);
+	getFiles('./events', ['ts', 'js'], ['node_modules'], false);
 
 export async function loadEvents(client: Wumpus) {
 	const events = await getEvents();
 
-	if (!events?.success) return client.logger.error('Failed to load commands');
+	if (!events?.success) return client.logger.error('Failed to load evemts');
 
-	if (!events.files.length) return client.logger.warn('No commands found');
+	if (!events.files.length) return client.logger.warn('No events found');
 
 	events.files.forEach((event) => {
-		const { default: exportedContent } = require(path.join(
-			process.cwd(),
-			'src/events',
-			event
+		const { default: exportedContent } = require(getPath(
+			`./events/${event}`
 		));
 
 		if (!(exportedContent instanceof Event))

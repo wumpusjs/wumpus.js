@@ -1,7 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import path, { sep } from 'path';
 import { getRepositoryToken } from '../utils/typeorm';
-import { getFiles } from '../utils/file';
+import { getFiles, getPath } from '../utils/file';
 import Wumpus from '../structures/wumpus';
 import { RepositoriesMap } from '../interfaces/repositories';
 
@@ -21,30 +21,26 @@ export default class Database {
 			database: process.env.DATABASE_NAME,
 			synchronize: process.env.ENVIRONMENT === 'development',
 			entities: [
-				path.join(__dirname, '../') + `**${sep}entity${sep}*{.ts,.js}`,
+				path.join(__dirname, '../', `**${sep}entity`) +
+					`${sep}*{.ts,.js}`,
 			],
 		});
 	}
 
 	async initialize() {
+		const scanDir = ['src', 'dist'][+(process.env.DEV_MODE === 'true')];
+
 		await this.datasource.initialize().catch(() => {
 			global.logger('Failed to connect to database');
 			process.exit(1);
 		});
 
-		const list = await getFiles(
-			'./src/entity',
-			['ts', 'js'],
-			['node_modules']
-		);
+		const list = await getFiles('./entity', ['ts', 'js'], ['node_modules']);
 
 		if (!list.success) return;
 
 		for (const file of list.files) {
-			const entity = require(path.join(
-				__dirname,
-				`../entity/${file}`
-			)).default;
+			const entity = require(getPath(`./entity/${file}`)).default;
 			const token = getRepositoryToken(entity as any);
 
 			const repository = this.datasource.getRepository(entity);

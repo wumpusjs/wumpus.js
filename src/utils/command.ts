@@ -4,7 +4,7 @@ import {
 	RESTPostAPIChatInputApplicationCommandsJSONBody,
 	Routes,
 } from 'discord.js';
-import { getFiles } from './file';
+import { getFiles, getPath } from './file';
 import CommandManager from '../classes/CommandManager';
 import path from 'path';
 import { SHA256 } from './crypto';
@@ -12,7 +12,7 @@ import Command from '../classes/Command';
 import Wumpus from '../structures/wumpus';
 
 export const getCommands = () =>
-	getFiles('./src/commands', ['ts', 'js'], ['node_modules']);
+	getFiles('./commands', ['ts', 'js'], ['node_modules']);
 
 export async function loadCommands(client: Wumpus) {
 	const commands = await getCommands();
@@ -26,10 +26,8 @@ export async function loadCommands(client: Wumpus) {
 		client.command = new CommandManager(client, Locale.EnglishUS);
 
 	commands.files.forEach((command) => {
-		const { default: exportedContent } = require(path.join(
-			process.cwd(),
-			'src/commands',
-			command
+		const { default: exportedContent } = require(getPath(
+			`./commands/${command}`
 		));
 
 		if (!(exportedContent instanceof Command))

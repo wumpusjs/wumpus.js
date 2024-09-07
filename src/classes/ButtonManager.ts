@@ -4,8 +4,7 @@ import { ButtonField, InferOptions } from '../interfaces/Button';
 import { Repository } from 'typeorm';
 import ButtonEntity from '../entity/Button';
 import { RANDOM_STRING } from '../utils/crypto';
-import { getFiles } from '../utils/file';
-import path from 'path';
+import { getFiles, getPath } from '../utils/file';
 import { EntityClassOrSchema, getRepositoryToken } from '../utils/typeorm';
 import { identifyPacket, packet, resolve, validate } from '../utils/data';
 import Wumpus from '../structures/wumpus';
@@ -26,7 +25,7 @@ export default class ButtonManager {
 
 	async initialize() {
 		const files = await getFiles(
-			'./src/buttons',
+			'./buttons',
 			['ts', 'js'],
 			['node_modules']
 		);
@@ -37,7 +36,7 @@ export default class ButtonManager {
 		}
 
 		for (const file of files.files) {
-			const button = require(path.join(__dirname, '../buttons', file));
+			const button = require(getPath(`./buttons/${file}`));
 
 			const STRUCTURE: string[] = [];
 

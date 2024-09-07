@@ -27,4 +27,13 @@ export function parseENV(client: Wumpus) {
 		);
 		process.exit(1);
 	}
+
+	// @ts-ignore
+	process.env.DEV_MODE = String(
+		!!process[Symbol.for('ts-node.register.instance')]
+	);
+
+	if (process.env.DEV_MODE === 'true') {
+		client.logger.info('ts-node detected, running in development mode');
+	}
 }
