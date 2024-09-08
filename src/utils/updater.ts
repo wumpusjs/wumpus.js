@@ -6,7 +6,7 @@ import type Wumpus from '../structures/wumpus';
 
 const PACKAGE_JSON_PATH = path.resolve(__dirname, '../../package.json');
 const REMOTE_PACKAGE_JSON_URL =
-	'https://raw.githubusercontent.com/wraith4081/wumpus/main/package.json';
+	'https://raw.githubusercontent.com/wumpusjs/wumpus.js/main/package.json';
 
 async function getVersion(
 	source: 'local' | 'remote',

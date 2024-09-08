@@ -18,6 +18,7 @@ import { checkForUpdate } from './utils/updater';
 import pino from 'pino';
 import pretty from 'pino-pretty';
 import Stator from './classes/Stator';
+import SelectManager from './classes/SelectManager';
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ class Wumpus implements WumpusStructure {
 	middleware: MiddlewareManager;
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
+	selects: SelectManager;
 	database: Database;
 	superusers: string[] = [];
 	logger = pino(
@@ -55,6 +57,7 @@ class Wumpus implements WumpusStructure {
 		this.temp = new TempManager(this);
 		this.middleware = new MiddlewareManager(this);
 		this.buttons = new ButtonManager(this, Locale.EnglishUS);
+		this.selects = new SelectManager(this, Locale.EnglishUS);
 		this.command = new CommandManager(this, Locale.EnglishUS);
 		this.stator = new Stator(this);
 
@@ -76,6 +79,7 @@ class Wumpus implements WumpusStructure {
 		await putCommands(this, this.command.getCommandsJSON());
 
 		await this.buttons.initialize();
+		await this.selects.initialize();
 	}
 
 	async start() {

@@ -8,6 +8,7 @@ import ButtonManager from '../classes/ButtonManager';
 import Database from '../classes/Database';
 import { Logger } from 'pino';
 import Stator from '../classes/Stator';
+import SelectManager from '../classes/SelectManager';
 
 export default interface Wumpus {
 	instance: Client;
@@ -19,6 +20,7 @@ export default interface Wumpus {
 	middleware: MiddlewareManager;
 	command: CommandManager<any, any, any>;
 	buttons: ButtonManager;
+	selects: SelectManager;
 	superusers: string[];
 	stator: Stator;
 

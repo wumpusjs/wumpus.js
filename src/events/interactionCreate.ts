@@ -43,6 +43,15 @@ export default new Event({
 					ephemeral: true,
 				});
 			}
+		} else if (interaction.isAnySelectMenu()) {
+			if (interaction.isStringSelectMenu()) {
+				await client.selects.handle(interaction);
+			} else {
+				await interaction.reply({
+					content: 'This select menu is not supported.',
+					ephemeral: true,
+				});
+			}
 		}
 	},
 });
